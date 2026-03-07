@@ -1,0 +1,29 @@
+services:
+  db-postgres:
+    image: ankane/pgvector:latest
+    container_name: db_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: vector_db
+    networks:
+      - web
+
+  pg-admin:
+    image: dpage/pgadmin4
+    container_name: pg_admin
+    ports:
+      - "15432:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: postgres@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: postgres
+    depends_on:
+      - db-postgres
+    networks:
+      - web
+
+networks:
+  web:
+    external: true

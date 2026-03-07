@@ -1,0 +1,9 @@
+llama-index
+llama-index-vector-stores-postgres
+llama-index-storage-chat-store-postgres
+llama-index-llms-openai
+python-dotenv
+psycopg2-binary
+sqlalchemy
+gradio
+psycopg-binary
