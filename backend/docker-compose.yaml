@@ -1,13 +1,13 @@
 services:
   db-postgres:
     image: ankane/pgvector:latest
-    container_name: db_postgres
+    container_name: chatbot_db
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: vector_db
+      POSTGRES_DB: chatbot_db
     networks:
       - web
 
