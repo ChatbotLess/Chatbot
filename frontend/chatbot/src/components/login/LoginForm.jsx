@@ -1,22 +1,51 @@
 export function LoginForm() {
     return (
-        <div> c
-            <header>
-                <h1>LOGIN</h1>
-            </header>
-            <form action="">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-                    Email:
-                </label>
-                <input type="text" name="email" id="email" placeholder="Escreva seu email " />
-                <label htmlFor="senha" className="block text-sm font-medium text-gray-300">
-                    Senha:
-                </label>
-                <input type="password" name="senha" id="senha" placeholder="Escreva sua senha " />
+        <div className="bg-gray-900 rounded-lg p-10 shadow-xl w-full max-w-md">
+
+            <form action="" className="space-y-5">
+                <header className="mb-6">
+                    <h1 className="text-2xl font-bold text-white">LOGIN</h1>
+                </header>
+                
+                <div className="space-y-2">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+                        Email:
+                    </label>
+                    <input 
+                        type="email" 
+                        name="email" 
+                        id="email" 
+                        placeholder="Escreva seu email" 
+                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label htmlFor="senha" className="block text-sm font-medium text-gray-300">
+                        Senha:
+                    </label>
+                    <input 
+                        type="password" 
+                        name="senha" 
+                        id="senha" 
+                        placeholder="Escreva sua senha" 
+                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
+                    />
+                </div>
             </form>
-            <footer>
-                <button type="submit" className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900">
+
+            <footer className="mt-6 space-y-5">
+                <button 
+                    type="submit" 
+                    className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900"
+                >
                     Entrar
+                </button>
+                <button 
+                    type="submit" 
+                    className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900"
+                >
+                    Cadastar-se
                 </button>
             </footer>
         </div>

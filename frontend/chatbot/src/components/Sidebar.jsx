@@ -1,18 +1,20 @@
 import { FaUser, FaEllipsisV, FaPlus, FaFileUpload, FaChartBar } from "react-icons/fa";
 import { MdOutlineMessage } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 
 export function Sidebar() {
+  const navigate = useNavigate();
   return (
     <aside className="flex flex-col justify-between h-screen w-64 bg-gray-900 text-gray-200 p-4 rounded-r-lg">
 
-      <header className="flex items-center gap-2 mb-6">
+      <header className="flex items-center gap-2 mb-6 cursor-pointer hover:opacity-80 transition" onClick={() => navigate('/')}>
         <MdOutlineMessage className="text-2xl text-white" />
         <h1 className="text-2xl font-bold text-white">Chatbot</h1>
       </header>
 
       <div className="flex flex-col gap-2">
-        <button className="flex items-center gap-2 hover:bg-gray-800 p-2 rounded transition">
+        <button className="flex items-center gap-2 hover:bg-gray-800 p-2 rounded transition" onClick={() => navigate('/')}>
           <FaPlus />
           Nova Conversa
         </button>
