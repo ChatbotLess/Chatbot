@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { Chat } from './pages/chat/Chat';
 import { NewChat } from './pages/chat/Newchat';
 import { Login } from './pages/login/Login';
+import { Signup } from './pages/signup/Signup';
 import { Sidebar } from './components/Sidebar';
 
 function AppContent() {
@@ -18,6 +19,7 @@ function AppContent() {
           <Route path='/chat' element={<Chat />} />
           <Route path='/chat/:conversationId' element={<Chat />} />
           <Route path='/login' element={<Login />} />
+          <Route path='/signup' element={<Signup />} />
         </Routes>
       </main>
     </div>
