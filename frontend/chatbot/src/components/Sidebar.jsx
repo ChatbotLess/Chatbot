@@ -1,9 +1,24 @@
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthProvider/AuthProvider";
 import { FaUser, FaEllipsisV, FaPlus, FaFileUpload, FaChartBar } from "react-icons/fa";
+import { MdLogout } from "react-icons/md";
 import { MdOutlineMessage } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
 
+
 export function Sidebar() {
+  const { logOut } = useContext(AuthContext);
+  
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      navigate("/login");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const navigate = useNavigate();
   return (
     <aside className="flex flex-col justify-between h-screen w-64 bg-gray-900 text-gray-200 p-4 rounded-r-lg">
@@ -50,8 +65,11 @@ export function Sidebar() {
           </span>
         </div>
 
-        <button className="cursor-pointer text-gray-400 hover:text-white">
-          <FaEllipsisV />
+        <button
+          onClick={handleLogout}
+          className="cursor-pointer text-gray-400 hover:text-white"
+        >
+          <MdLogout />
         </button>
       </footer>
 

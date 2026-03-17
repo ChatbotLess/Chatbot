@@ -1,33 +1,26 @@
 import { useNavigate } from "react-router-dom";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase";
+import { useContext, useState } from "react";
+import { AuthContext } from "../../context/AuthProvider/AuthProvider";
 import { useForm } from 'react-hook-form';
 
 
 export function SignupForm() {
-    const { register, handleSubmit, reset, watch  } = useForm();
+    const { register, handleSubmit, watch, formState: { errors } } = useForm();
+    const { createUser } = useContext(AuthContext);
     const navigate = useNavigate();
-
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSignup = async (data) => {
+        setIsLoading(true);
 
         try {
-            const userCredential = await createUserWithEmailAndPassword(
-                auth,
-                data.email,
-                data.senha
-            );
-
-            
-            navigate(`/login`);
-
+            await createUser(data.email, data.senha);
+            navigate("/login");
         } catch (error) {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-
-            console.log("errorCode:", errorCode, "errorMessage:", errorMessage);
+            console.error("Error code:", error.code, "Error message:", error.message);
+        } finally {
+            setIsLoading(false);
         }
-        
     }
 
     return (
@@ -108,13 +101,15 @@ export function SignupForm() {
                 <footer className="mt-6 space-y-5">
                     <button
                         type="submit"
-                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900"
+                        disabled={isLoading}
+                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Cadastar-se
+                        {isLoading ? "Cadastrando..." : "Cadastrar-se"}
                     </button>
                     <button
-                        type="submit"
-                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900" onClick={() => navigate('/login')}
+                        type="button"
+                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900" 
+                        onClick={() => navigate('/login')}
                     >
                         Voltar
                     </button>
