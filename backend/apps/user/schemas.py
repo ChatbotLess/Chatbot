@@ -1,7 +1,13 @@
 from ninja import ModelSchema
 from .models import User
 
-class UserSchema(ModelSchema):
+class UserSchemaOut(ModelSchema):
     class Meta:
         model = User
-        fields = "__all__"
+        exclude = ['password', 'last_login', 'user_permissions', 'is_superuser', 'groups']
+
+
+class UserSchemaIn(ModelSchema):
+    class Meta:
+        model = User
+        exclude = ['last_login', 'user_permissions', 'is_superuser', 'groups']        
