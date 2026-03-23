@@ -3,6 +3,8 @@ import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  confirmPasswordReset,
   signOut,
 } from "firebase/auth";
 import { createContext, useEffect, useState } from "react";
@@ -27,6 +29,18 @@ const AuthProvider = ({ children }) => {
       .finally(() => setLoading(false));
   };
 
+  const resetPassword = (email, actionCodeSettings) => {
+    setLoading(true);
+    return sendPasswordResetEmail(auth, email, actionCodeSettings)
+      .finally(() => setLoading(false));
+  };
+
+  const confirmPassword = (oobCode, senha) => {
+    setLoading(true);
+    return confirmPasswordReset(auth, oobCode, senha)
+      .finally(() => setLoading(false));
+  };
+
   const logOut = () => {
     setLoading(true);
     return signOut(auth)
@@ -48,6 +62,8 @@ const AuthProvider = ({ children }) => {
     createUser,
     user,
     loginUser,
+    resetPassword,
+    confirmPassword,
     logOut,
     loading,
   };
