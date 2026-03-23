@@ -32,7 +32,8 @@ INSTALLED_APPS = [
     'apps.user',
     'apps.chat',
     'apps.base_conhecimento',
-    'apps.rag'
+    'apps.rag',
+    'apps.analytics'
 ]
 
 MIDDLEWARE = [
