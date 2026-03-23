@@ -4,6 +4,8 @@ import { Chat } from './pages/chat/Chat';
 import { NewChat } from './pages/chat/Newchat';
 import { Login } from './pages/login/Login';
 import { Signup } from './pages/signup/Signup';
+import { ResetPassPage } from './pages/reset_password/ResetPassPage';
+import { ResetPassPage2 } from './pages/reset_password/ResetPassPage2';
 import { NotFound } from './pages/NotFound';
 import { Sidebar } from './components/Sidebar';
 import PrivateRoute from './context/AuthProvider/privateRoute';
@@ -43,6 +45,16 @@ function AppContent() {
           <Route path='/signup' element={
             <PublicRoute>
               <Signup />
+            </PublicRoute>
+          } />
+          <Route path='/reset' element={
+            <PublicRoute>
+              <ResetPassPage />
+            </PublicRoute>
+          } />
+          <Route path='/reset-password' element={
+            <PublicRoute>
+              <ResetPassPage2 />
             </PublicRoute>
           } />
           <Route path='*' element={<NotFound />} />
