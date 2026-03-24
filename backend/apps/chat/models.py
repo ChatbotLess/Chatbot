@@ -18,7 +18,6 @@ class Mensagem(models.Model):
   conteudo = models.TextField();
   role = models.TextField();
   pergunta_original = models.TextField(null=True, blank=True);
-  pergunta_processada = models.TextField(null=True, blank=True);
   intencao = models.TextField(null=True, blank=True);
   chat = models.ForeignKey(
         "chat.Chat",
