@@ -1,16 +1,20 @@
 from django.db import models
-
-# Create your models here.
+from django.core.validators import FileExtensionValidator
 
 class Base_Conhecimento(models.Model):
   titulo = models.TextField();
+  versao = models.TextField();
   data_atualizacao = models.DateTimeField(auto_now_add=True);
   descricao = models.TextField();
   status = models.TextField();
 
 class Documento(models.Model):
+  nome_documento = models.TextField();
   data_atualizacao = models.DateTimeField(auto_now_add=True);
-  caminho = models.TextField();
+  caminho = models.FileField(
+      upload_to='documentos/',
+      validators=[FileExtensionValidator(['pdf'])],
+  );
   status = models.TextField();
   usuario = models.ForeignKey(
         "user.User",
