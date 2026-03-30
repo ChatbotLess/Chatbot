@@ -10,6 +10,6 @@ router = Router()
 
 @router.post("/message", response=MensagemSchemaOut)
 def enviar_mensagem(request, message: str):
-  resposta = responder_mensagem(5,message)
+  resposta = responder_mensagem(None,message)
   return resposta
 

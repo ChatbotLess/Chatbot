@@ -42,7 +42,7 @@ def fazer_pergunta(pergunta_usuario, chat_id=None, usuario_id=None):
       pergunta_original=pergunta_usuario
     )
     
-    rag_instance = inicializar_rag()
+    rag_instance = gerar_embeddings()
     chat_engine = rag_instance.criar_chat_engine(chat_id)
     
     # Obter resposta
@@ -59,7 +59,7 @@ def fazer_pergunta(pergunta_usuario, chat_id=None, usuario_id=None):
     return resposta
 
 def responder_mensagem(chat_id=None, pergunta=""):
-  resposta = fazer_pergunta(pergunta, chat_id, "85b6899b-1fd1-480f-9cbb-10b4836610fa") 
+  resposta = fazer_pergunta(pergunta, chat_id, "24b21607-ac11-4a2b-a472-2fc55ab85a97") 
   
   return resposta;
 
