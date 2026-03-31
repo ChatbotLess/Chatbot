@@ -1,9 +1,10 @@
 from apps.chat.models import Mensagem, Chat
+from .models import ChunkDocumento, MensagemChunk
 from apps.rag.rag import Rag
 from pathlib import Path
 import os
 
-def salvar_mensagem(chat_id, role, conteudo, pergunta_original=None, intencao=None):
+def salvar_mensagem(chat_id, role, conteudo, pergunta_original=None, intencao=None, source_nodes=None):
   mensagem = Mensagem(
     chat_id=chat_id,
     role=role,
@@ -13,8 +14,20 @@ def salvar_mensagem(chat_id, role, conteudo, pergunta_original=None, intencao=No
     )
   
   mensagem.save()
-
   return mensagem
+
+def salvar_metadados(mensagem, procura_nodes):
+  for node in procura_nodes: #Percorre a resposta procurando os nodes
+      node_id = node.node.node_id
+      nome_arquivo = node.node.metadata.get("file_name", "")
+      chunk = ChunkDocumento.objects.filter(node_id=node_id).first() #Ve 
+      if chunk:
+        MensagemChunk.objects.get_or_create(
+          chunk=chunk,
+          mensagem=mensagem,
+          defaults={"nome_arquivo": nome_arquivo}
+        )
+    
 
 def fazer_pergunta(pergunta_usuario, chat_id=None, usuario_id=None):
     # Se não tiver chat_id, criar um novo chat
@@ -42,24 +55,32 @@ def fazer_pergunta(pergunta_usuario, chat_id=None, usuario_id=None):
       pergunta_original=pergunta_usuario
     )
     
-    rag_instance = gerar_embeddings()
-    chat_engine = rag_instance.criar_chat_engine(chat_id)
+    chunkDocumento = ChunkDocumento.objects.all()
     
+    if len(chunkDocumento) == 0: 
+      rag_instance = gerar_embeddings()
+      chat_engine = rag_instance.criar_chat_engine(chat_id)
+    else:
+      rag_instance = inicializar_rag()
+      chat_engine = rag_instance.criar_chat_engine(chat_id)
+            
     # Obter resposta
     response = chat_engine.chat(pergunta_usuario)
-    
+
     # Salvar resposta do assistente
     resposta = salvar_mensagem(
       chat_id=chat_id,
       role="assistant",
       conteudo=str(response),
-      pergunta_original = pergunta_usuario
+      pergunta_original=pergunta_usuario,
     )
+    
+    salvar_metadados(resposta, response.source_nodes)
     
     return resposta
 
-def responder_mensagem(chat_id=None, pergunta=""):
-  resposta = fazer_pergunta(pergunta, chat_id, "24b21607-ac11-4a2b-a472-2fc55ab85a97") 
+def responder_mensagem(userid, chat_id=None, pergunta=""):
+  resposta = fazer_pergunta(pergunta, chat_id, userid) 
   
   return resposta;
 

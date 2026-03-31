@@ -121,7 +121,7 @@ class Rag():
       use_async=False,
     )
 
-    response_synthesizer = CompactAndRefine()
+    response_synthesizer = CompactAndRefine(streaming=True)
     
     return retriever, response_synthesizer
     

@@ -23,7 +23,7 @@ class Mensagem(models.Model):
         "chat.Chat",
         on_delete=models.CASCADE,
         db_column="id_chat",
-        related_name="chat"
+        related_name="mensagens"
     )
 
 class Feedback(models.Model):
