@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 export function Sidebar() {
   const { logOut } = useContext(AuthContext);
+  const navigate = useNavigate();
   
   const handleLogout = async () => {
     try {
@@ -19,7 +20,6 @@ export function Sidebar() {
     }
   };
 
-  const navigate = useNavigate();
   return (
     <aside className="flex flex-col justify-between h-screen w-64 bg-gray-900 text-gray-200 p-4 rounded-r-lg">
 
@@ -34,12 +34,12 @@ export function Sidebar() {
           Nova Conversa
         </button>
 
-        <button className="flex items-center gap-2 hover:bg-gray-800 p-2 rounded transition">
+        <button className="flex items-center gap-2 hover:bg-gray-800 p-2 rounded transition" onClick={() => navigate('/upload')}>
           <FaFileUpload />
           Inserir Documentos
         </button>
 
-        <button className="flex items-center gap-2 hover:bg-gray-800 p-2 rounded transition">
+        <button className="flex items-center gap-2 hover:bg-gray-800 p-2 rounded transition" onClick={() => navigate('/dashboard')}>
           <FaChartBar />
           Dashboard
         </button>
