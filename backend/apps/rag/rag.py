@@ -20,7 +20,7 @@ from llama_index.core.query_engine import RetrieverQueryEngine
 # Importar os models do Django
 from apps.chat.models import Mensagem, Chat
 
-class rag():
+class Rag():
   def __init__(self, temperature=0.7):
     self.temperature = temperature
     # USA O BANCO DE DADOS DO DJANGO
@@ -34,7 +34,7 @@ class rag():
 
     # CONFIGURANDO O LLM DA OPENAI
     llm = OpenAI(
-        model="gpt-4-mini",  
+        model="gpt-4.1-mini",  
         temperature=self.temperature,       # Criatividade (0.0 = mais focado, 1.0 = mais criativo)
         api_key=api_key,
     )
@@ -53,7 +53,7 @@ class rag():
 
     self.nodes = node_parser.get_nodes_from_documents(docs, show_progress=True)
 
-  def criar_indice(self):
+  def _criar_vector_store(self):
       # FAZ O embedding E GUARDA NO BANCO DE DADOS
       url = make_url(self.connection_string)
       
@@ -76,13 +76,31 @@ class rag():
           },
       )
 
-      storage_context = StorageContext.from_defaults(
-          vector_store=hybrid_vector_store
-      )
-      
-      hybrid_index = VectorStoreIndex.from_documents(
-          self.nodes, storage_context=storage_context
-      )
+      return hybrid_vector_store
+
+  def criar_indice(self):
+    hybrid_vector_store = self._criar_vector_store()
+
+    storage_context = StorageContext.from_defaults(
+      vector_store=hybrid_vector_store
+    )
+
+    self.hybrid_index = VectorStoreIndex(
+      self.nodes,
+      storage_context=storage_context
+    )
+        
+  def conectar_indice_existente(self):
+    hybrid_vector_store = self._criar_vector_store()
+
+    storage_context = StorageContext.from_defaults(
+       vector_store=hybrid_vector_store
+    )
+
+    self.hybrid_index = VectorStoreIndex.from_vector_store(
+      vector_store=hybrid_vector_store,
+      storage_context=storage_context
+    )
 
   def busca_hibrida(self):
     vector_retriever = self.hybrid_index.as_retriever(
@@ -103,7 +121,7 @@ class rag():
       use_async=False,
     )
 
-    response_synthesizer = CompactAndRefine()
+    response_synthesizer = CompactAndRefine(streaming=True)
     
     return retriever, response_synthesizer
     
@@ -147,56 +165,5 @@ class rag():
     
     return chat_engine
   
-  def salvar_mensagem(self, chat_id, role, conteudo, pergunta_original=None, pergunta_processada=None, intencao=None):
-
-    mensagem = Mensagem.objects.create(
-      chat_id=chat_id,
-      role=role,
-      conteudo=conteudo,
-      pergunta_original=pergunta_original,
-      pergunta_processada=pergunta_processada,
-      intencao=intencao
-    )
-    return mensagem
   
-  def fazer_pergunta(self, pergunta_usuario, chat_id=None, usuario_id=None):
-    
-    # Se não tiver chat_id, criar um novo chat
-    if chat_id is None:
-      if usuario_id is None:
-        raise ValueError("usuario_id é obrigatório para criar um novo chat")
-      
-      # Criar um novo chat com título baseado na pergunta (primeiras 50 caracteres)
-      titulo = pergunta_usuario[:50] + "..." if len(pergunta_usuario) > 50 else pergunta_usuario
-      
-      novo_chat = Chat.objects.create(
-        titulo=titulo,
-        usuario_id=usuario_id
-      )
-      chat_id = novo_chat.id
-    
-    # Salvar pergunta do usuário
-    self.salvar_mensagem(
-      chat_id=chat_id,
-      role="user",
-      conteudo=pergunta_usuario,
-      pergunta_original=pergunta_usuario
-    )
-    
-    # Criar chat engine com histórico
-    chat_engine = self.criar_chat_engine(chat_id)
-    
-    # Obter resposta
-    response = chat_engine.chat(pergunta_usuario)
-    
-    # Salvar resposta do assistente
-    self.salvar_mensagem(
-      chat_id=chat_id,
-      role="assistant",
-      conteudo=str(response)
-    )
-    
-    return {
-      'resposta': str(response),
-      'chat_id': chat_id
-    }
+  

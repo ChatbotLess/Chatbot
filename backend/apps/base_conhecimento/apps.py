@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class BaseConhecimentoConfig(AppConfig):
-    name = 'base_conhecimento'
+    name = 'apps.base_conhecimento'
