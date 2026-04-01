@@ -65,19 +65,30 @@ def fazer_pergunta(pergunta_usuario, chat_id=None, usuario_id=None):
       chat_engine = rag_instance.criar_chat_engine(chat_id)
             
     # Obter resposta
-    response = chat_engine.chat(pergunta_usuario)
+    response = chat_engine.stream_chat(pergunta_usuario)
 
-    # Salvar resposta do assistente
-    resposta = salvar_mensagem(
-      chat_id=chat_id,
-      role="assistant",
-      conteudo=str(response),
-      pergunta_original=pergunta_usuario,
-    )
+    #Faz o stream da resposta
+    def stream_resposta():
+        texto_completo = ""
+
+        try:
+            for text in response.response_gen:
+                texto_completo += text
+                yield text
+        finally:
+            if texto_completo:
+                resposta = salvar_mensagem(
+                    chat_id=chat_id,
+                    role="assistant",
+                    conteudo=texto_completo,
+                    pergunta_original=pergunta_usuario,
+                )
+                salvar_metadados(resposta, response.source_nodes)
+
+    return stream_resposta()
     
-    salvar_metadados(resposta, response.source_nodes)
-    
-    return resposta
+
+
 
 def responder_mensagem(userid, chat_id=None, pergunta=""):
   resposta = fazer_pergunta(pergunta, chat_id, userid) 
