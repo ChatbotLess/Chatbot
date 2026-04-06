@@ -26,9 +26,16 @@ class Mensagem(models.Model):
         related_name="mensagens"
     )
 
+
 class Feedback(models.Model):
+  class MensagemFeedback(models.TextChoices):
+    LIKE = "LIKE", "Like"
+    DISLIKE = "DISLIKE", "Dislike"
   data = models.DateTimeField(auto_now_add=True);
-  tipo = models.TextField();
+  tipo = models.TextField(
+    max_length=10,
+    choices=MensagemFeedback.choices
+  );
   mensagem_feedback = models.TextField();
   mensagem = models.OneToOneField(
         "chat.Mensagem",
