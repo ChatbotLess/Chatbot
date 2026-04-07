@@ -31,7 +31,7 @@ class Documento(models.Model):
   )
   data_atualizacao = models.DateTimeField(auto_now_add=True);
   caminho = models.FileField(
-      upload_to='./',
+      upload_to='',
       max_length=255,
       validators=[FileExtensionValidator(['pdf'])],
   );

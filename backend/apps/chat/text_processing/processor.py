@@ -62,8 +62,10 @@ class PDFTextProcessor:
             raise FileNotFoundError(f"Arquivo nao encontrado: {input_pdf_path}")
 
         if output_pdf_path is None:
+            processed_dir = input_path.parent / "processed"
+            processed_dir.mkdir(parents=True, exist_ok=True)
             output_pdf_path = str(
-                input_path.with_name(f"{input_path.stem}_processado.pdf")
+                processed_dir / f"{input_path.stem}_processado.pdf"
             )
 
         raw_text = self.extract_text_from_pdf(str(input_path))

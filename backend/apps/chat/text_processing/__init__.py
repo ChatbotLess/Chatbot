@@ -10,8 +10,8 @@ from .presets import NormalizationPresets
 from .processor import PDFTextProcessor
 
 
-def run_text_processing_flow() -> None:
-    PDF = r"C:\Users\usuario\Desktop\IFES\LES\Documentos\portarias\PORTARIA Nº 1 -  2025 - Designa substituto(a) da Coordenadoria Geral de Gestão do Campo _ FILIPE HUBNER.pdf"
+def run_text_processing_flow(path) -> None:
+    PDF = path
 
     processor = PDFTextProcessor(
         pipeline=NormalizationPresets.keep_punctuation()
