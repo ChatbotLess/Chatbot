@@ -6,6 +6,7 @@ from .schemas import DocumentoSchemaOut, BaseConhecimentoIn, ErroSchema
 from .models import Documento, Base_Conhecimento
 from apps.user.models import User
 from apps.chat.text_processing import run_text_processing_flow
+from apps.rag.services import indexar_documento_no_rag
 
 router = Router()
 
@@ -56,6 +57,13 @@ def upload(request, base_id : int, user_id: str, file: File[UploadedFile], tipo:
     doc.caminho.save(file.name, file, save=True)
 
     run_text_processing_flow(doc.caminho.path)
+    
+    try:
+      indexar_documento_no_rag(doc.caminho.path,tipo,doc.data_atualizacao,)
+    except Exception as e:
+      doc.status = Documento.StatusDocumento.ERRO
+      doc.save(update_fields=["status"])
+      return {"erro": str(e)}
 
     doc.status = Documento.StatusDocumento.CONCLUIDO
     doc.save(update_fields=["status"])
