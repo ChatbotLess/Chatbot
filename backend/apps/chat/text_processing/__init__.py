@@ -18,7 +18,7 @@ def run_text_processing_flow(path) -> None:
     )
 
     custom_pipeline = TokenNormalizationPipeline([
-        SkipSpacesFilter(),
+        #SkipSpacesFilter(),
         PunctuationFilter(keep=True),   # mantem pontuacao
         StopWordFilter(remove=False),   # mantem stop words
         LemmaTransform(use_lemma=True), # ainda lematiza

@@ -55,15 +55,28 @@ def fazer_pergunta(pergunta_usuario, chat_id=None, usuario_id=None):
       pergunta_original=pergunta_usuario
     )
     
-    chunkDocumento = ChunkDocumento.objects.all()
-    
-    if len(chunkDocumento) == 0: 
-      rag_instance = gerar_embeddings()
-      chat_engine = rag_instance.criar_chat_engine(chat_id)
-    else:
-      rag_instance = inicializar_rag()
-      chat_engine = rag_instance.criar_chat_engine(chat_id)
-            
+    sem_documentos = not ChunkDocumento.objects.exists()
+
+    if sem_documentos:
+      MENSAGEM_SEM_DOCS = (
+        "Ainda não há documentos indexados na base de conhecimento. "
+        "Por favor, envie um documento antes de fazer perguntas."
+      )
+
+      def stream_sem_documentos():
+        salvar_mensagem(
+          chat_id=chat_id,
+          role="assistant",
+          conteudo=MENSAGEM_SEM_DOCS,
+          pergunta_original=pergunta_usuario,
+        )
+        yield MENSAGEM_SEM_DOCS
+
+      return stream_sem_documentos()
+
+    rag_instance = inicializar_rag()
+    chat_engine = rag_instance.criar_chat_engine(chat_id)
+
     # Obter resposta
     response = chat_engine.stream_chat(pergunta_usuario)
 
@@ -88,11 +101,8 @@ def fazer_pergunta(pergunta_usuario, chat_id=None, usuario_id=None):
     return stream_resposta()
     
 
-
-
 def responder_mensagem(userid, chat_id=None, pergunta=""):
   resposta = fazer_pergunta(pergunta, chat_id, userid) 
-  
   return resposta;
 
 def inicializar_rag():
@@ -103,14 +113,9 @@ def inicializar_rag():
   
   return rag_instance
 
-def gerar_embeddings():
-  BASE_DIR = Path(__file__).resolve().parent.parent.parent
-  MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+def indexar_documento_no_rag(caminho: str,tipo: str,data):
+  #Gera embeddings de um único arquivo e insere no vector store.
   rag_instance = Rag()
   rag_instance.carregar_llm()
-  rag_instance.leitura_documentos(MEDIA_ROOT)
-  rag_instance.criar_indice()
-
-  return rag_instance
-  
+  rag_instance.indexar_documento(caminho,tipo,data)
