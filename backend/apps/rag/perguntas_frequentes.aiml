@@ -1,0 +1,334 @@
+<aiml version="1.0.1" encoding="UTF-8">
+
+<!-- SAUDAÇÃO CANÔNICA -->
+
+<category>
+    <pattern>OLA</pattern>
+    <template>
+        Olá! Seja bem-vindo. Como posso ajudar você hoje?
+    </template>
+</category>
+
+<!-- VARIAÇÕES DE OLÁ -->
+
+<category>
+    <pattern>OI</pattern>
+    <template><srai>OLA</srai></template>
+</category>
+
+<category>
+    <pattern>OLA TUDO BEM</pattern>
+    <template><srai>OLA</srai></template>
+</category>
+
+<category>
+    <pattern>OI TUDO BEM</pattern>
+    <template><srai>OLA</srai></template>
+</category>
+
+<category>
+    <pattern>BOA TARDE</pattern>
+    <template>
+        Boa tarde! Como posso ajudar você?
+    </template>
+</category>
+
+<category>
+    <pattern>BOM DIA</pattern>
+    <template>
+        Bom dia! Em que posso ajudar hoje?
+    </template>
+</category>
+
+<category>
+    <pattern>BOA NOITE</pattern>
+    <template>
+        Boa noite! Como posso ajudar você?
+    </template>
+</category>
+
+<!-- VARIAÇÕES DE SAUDAÇÕES -->
+
+<category>
+    <pattern>EAI</pattern>
+    <template><srai>OLA</srai></template>
+</category>
+
+<category>
+    <pattern>E AI</pattern>
+    <template><srai>OLA</srai></template>
+</category>
+
+<category>
+    <pattern>FALA AI</pattern>
+    <template><srai>OLA</srai></template>
+</category>
+
+<category>
+    <pattern>FALA</pattern>
+    <template><srai>OLA</srai></template>
+</category>
+
+<category>
+    <pattern>SALVE</pattern>
+    <template><srai>OLA</srai></template>
+</category>
+
+<category>
+    <pattern>OPA</pattern>
+    <template><srai>OLA</srai></template>
+</category>
+
+<category>
+    <pattern>HELLO</pattern>
+    <template><srai>OLA</srai></template>
+</category>
+
+<category>
+    <pattern>HI</pattern>
+    <template><srai>OLA</srai></template>
+</category>
+
+<category>
+    <pattern>HEY</pattern>
+    <template><srai>OLA</srai></template>
+</category>
+
+<!-- INÍCIO DE CONVERSA -->
+
+<category>
+    <pattern>QUERO INFORMACAO</pattern>
+    <template>
+        Claro! Sobre qual assunto você gostaria de informações?
+    </template>
+</category>
+
+<category>
+    <pattern>PRECISO DE AJUDA</pattern>
+    <template>
+        Claro! Estou aqui para ajudar. O que você precisa?
+    </template>
+</category>
+
+<category>
+    <pattern>PODE ME AJUDAR</pattern>
+    <template>
+        Claro que posso ajudar! Qual é sua dúvida?
+    </template>
+</category>
+
+<!-- PERGUNTAS AO BOT -->
+
+<category>
+    <pattern>QUEM E VOCE</pattern>
+    <template>
+        Eu sou um assistente virtual criado para ajudar com informações e responder perguntas.
+    </template>
+</category>
+
+<category>
+    <pattern>O QUE VOCE FAZ</pattern>
+    <template>
+        Eu respondo perguntas e ajudo você a encontrar informações rapidamente.
+    </template>
+</category>
+
+<category>
+    <pattern>COMO VOCE FUNCIONA</pattern>
+    <template>
+        Eu utilizo uma base de conhecimento para interpretar perguntas e fornecer respostas relevantes.
+    </template>
+</category>
+
+<!-- AGRADECIMENTO -->
+
+<category>
+    <pattern>OBRIGADO</pattern>
+    <template>
+        De nada! Se precisar de mais alguma coisa, estou aqui para ajudar.
+    </template>
+</category>
+
+<category>
+    <pattern>MUITO OBRIGADO</pattern>
+    <template><srai>OBRIGADO</srai></template>
+</category>
+
+<category>
+    <pattern>VALEU</pattern>
+    <template><srai>OBRIGADO</srai></template>
+</category>
+
+<category>
+    <pattern>AGRADECO</pattern>
+    <template><srai>OBRIGADO</srai></template>
+</category>
+
+<!-- DESPEDIDA -->
+
+<category>
+    <pattern>TCHAU</pattern>
+    <template>
+        Até logo! Foi um prazer ajudar você.
+    </template>
+</category>
+
+<category>
+    <pattern>ATE MAIS</pattern>
+    <template><srai>TCHAU</srai></template>
+</category>
+
+<category>
+    <pattern>ATE LOGO</pattern>
+    <template><srai>TCHAU</srai></template>
+</category>
+
+<category>
+    <pattern>FALOU</pattern>
+    <template><srai>TCHAU</srai></template>
+</category>
+
+<category>
+    <pattern>ATE BREVE</pattern>
+    <template><srai>TCHAU</srai></template>
+</category>
+
+<!-- ========================= -->
+<!-- PORTARIAS -->
+<!-- ========================= -->
+
+<category>
+    <pattern>O QUE E UMA PORTARIA</pattern>
+    <template>
+        Uma portaria é um ato administrativo utilizado pela instituição para designar funções, autorizar atividades, nomear comissões ou registrar decisões administrativas.
+    </template>
+</category>
+
+<category>
+    <pattern>PARA QUE SERVE UMA PORTARIA</pattern>
+    <template><srai>O QUE E UMA PORTARIA</srai></template>
+</category>
+
+<category>
+    <pattern>O QUE SIGNIFICA PORTARIA</pattern>
+    <template><srai>O QUE E UMA PORTARIA</srai></template>
+</category>
+
+<category>
+    <pattern>COMO CONSULTAR PORTARIAS</pattern>
+    <template>
+        As portarias podem ser consultadas no sistema institucional ou nos documentos oficiais publicados pelo instituto.
+    </template>
+</category>
+
+<category>
+    <pattern>QUE TIPO DE INFORMACAO TEM NAS PORTARIAS</pattern>
+    <template>
+        As portarias podem conter designação de servidores, nomeação de comissões, autorizações administrativas, progressões funcionais e outras decisões institucionais.
+    </template>
+</category>
+
+
+<!-- ========================= -->
+<!-- RESOLUCOES -->
+<!-- ========================= -->
+
+<category>
+    <pattern>O QUE E UMA RESOLUCAO</pattern>
+    <template>
+        Uma resolução é um ato normativo emitido por órgãos colegiados da instituição que estabelece regras, políticas ou regulamentos institucionais.
+    </template>
+</category>
+
+<category>
+    <pattern>PARA QUE SERVE UMA RESOLUCAO</pattern>
+    <template><srai>O QUE E UMA RESOLUCAO</srai></template>
+</category>
+
+<category>
+    <pattern>QUEM EMITE RESOLUCOES</pattern>
+    <template>
+        As resoluções normalmente são emitidas pelo Conselho Superior ou por outros órgãos colegiados da instituição.
+    </template>
+</category>
+
+<category>
+    <pattern>O QUE AS RESOLUCOES DEFINEM</pattern>
+    <template>
+        As resoluções definem políticas institucionais, regulamentos acadêmicos, normas administrativas e diretrizes para funcionamento da instituição.
+    </template>
+</category>
+
+
+<!-- ========================= -->
+<!-- REGULAMENTO DIDATICO -->
+<!-- ========================= -->
+
+<category>
+    <pattern>O QUE E O ROD</pattern>
+    <template>
+        O ROD é o Regulamento de Organização Didática que estabelece normas acadêmicas para cursos da instituição.
+    </template>
+</category>
+
+<category>
+    <pattern>O QUE SIGNIFICA ROD</pattern>
+    <template><srai>O QUE E O ROD</srai></template>
+</category>
+
+<category>
+    <pattern>PARA QUE SERVE O ROD</pattern>
+    <template>
+        O ROD define regras acadêmicas como matrícula, avaliação, frequência, trancamento, aproveitamento de estudos e organização dos cursos.
+    </template>
+</category>
+
+<category>
+    <pattern>EXISTE ROD PARA GRADUACAO</pattern>
+    <template>
+        Sim. Existem regulamentos específicos de organização didática para cursos de graduação.
+    </template>
+</category>
+
+<category>
+    <pattern>EXISTE ROD PARA CURSOS TECNICOS</pattern>
+    <template>
+        Sim. Os cursos técnicos também possuem Regulamento de Organização Didática próprio.
+    </template>
+</category>
+
+
+<!-- ========================= -->
+<!-- CONSULTA DE DOCUMENTOS -->
+<!-- ========================= -->
+
+<category>
+    <pattern>COMO CONSULTAR DOCUMENTOS</pattern>
+    <template>
+        Os documentos institucionais podem ser consultados nos repositórios oficiais da instituição ou em sistemas administrativos internos.
+    </template>
+</category>
+
+<category>
+    <pattern>ONDE ENCONTRAR RESOLUCOES</pattern>
+    <template><srai>COMO CONSULTAR DOCUMENTOS</srai></template>
+</category>
+
+<category>
+    <pattern>ONDE ENCONTRAR PORTARIAS</pattern>
+    <template><srai>COMO CONSULTAR DOCUMENTOS</srai></template>
+</category>
+
+
+<!-- ========================= -->
+<!-- FALLBACK -->
+<!-- ========================= -->
+
+<category>
+    <pattern>*</pattern>
+    <template>
+        Desculpe, não encontrei essa informação na base de documentos. Você pode reformular sua pergunta?
+    </template>
+</category>
+
+</aiml>

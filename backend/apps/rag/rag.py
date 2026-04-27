@@ -2,6 +2,7 @@
 from llama_index.core import SimpleDirectoryReader, StorageContext
 from llama_index.core import VectorStoreIndex
 from llama_index.core.node_parser import SentenceSplitter
+from pathlib import Path
 from llama_index.vector_stores.postgres import PGVectorStore
 from llama_index.llms.openai import OpenAI
 from llama_index.core import Settings
@@ -21,7 +22,7 @@ from llama_index.core.query_engine import RetrieverQueryEngine
 from apps.chat.models import Mensagem, Chat
 
 class Rag():
-  def __init__(self, temperature=0.7):
+  def __init__(self, temperature=0.5):
     self.temperature = temperature
     # USA O BANCO DE DADOS DO DJANGO
     self.connection_string = "postgresql://postgres:postgres@localhost:5432"
@@ -42,10 +43,20 @@ class Rag():
     # Define o LLM globalmente no LlamaIndex
     Settings.llm = llm
   
-  def leitura_documentos(self,caminho):
-    documents = SimpleDirectoryReader(input_dir=caminho)
+  def leitura_documento(self,caminho, tipo, data):
+    def metadata_arquivo(file_path):        
+        return {
+            "caminho": str(file_path),
+            "tipo": tipo,
+            "data": str(data),
+        }
     
-    #LENDO DOCUMENTOS
+    documents = SimpleDirectoryReader(
+      input_files=[caminho],
+      file_metadata=metadata_arquivo
+    )
+    
+    #LENDO DOCUMENTO
     docs = documents.load_data()
 
     #Separando em nodes (chunks)
@@ -54,7 +65,7 @@ class Rag():
     self.nodes = node_parser.get_nodes_from_documents(docs, show_progress=True)
 
   def _criar_vector_store(self):
-      # FAZ O embedding E GUARDA NO BANCO DE DADOS
+      # FAZ O SCHEMA DOS EMBBEDINGS NO BANCO 
       url = make_url(self.connection_string)
       
       hybrid_vector_store = PGVectorStore.from_params(
@@ -78,7 +89,7 @@ class Rag():
 
       return hybrid_vector_store
 
-  def criar_indice(self):
+  def criar_indice(self, nodes=None):
     hybrid_vector_store = self._criar_vector_store()
 
     storage_context = StorageContext.from_defaults(
@@ -86,8 +97,21 @@ class Rag():
     )
 
     self.hybrid_index = VectorStoreIndex(
-      self.nodes,
+      nodes or [],
       storage_context=storage_context
+    )
+
+  def indexar_documento(self, caminho,tipo, data ):
+    #Lê um único arquivo, gera os chunks e insere no vector store.
+    self.leitura_documento(caminho,tipo, data)
+
+    hybrid_vector_store = self._criar_vector_store()
+    storage_context = StorageContext.from_defaults(vector_store=hybrid_vector_store)
+
+    # Insere apenas os nodes do arquivo enviado no vector store existente
+    VectorStoreIndex(
+      self.nodes,
+      storage_context=storage_context,
     )
         
   def conectar_indice_existente(self):
@@ -155,12 +179,18 @@ class Rag():
       retriever=retriever,
       response_synthesizer=response_synthesizer,
       memory=memory,
-      system_prompt=(
-        "Você é um assistente virtual prestativo e inteligente. "
-        "Use o contexto fornecido para responder perguntas de forma clara e precisa. "
-        "Se não souber a resposta, diga que não tem essa informação. "
-        "Sempre responda em português."
-      ),
+      system_prompt = (
+          "Você é um assistente RAG especializado em responder perguntas a partir de documentos fornecidos como contexto. "
+          "Responda sempre em português, com clareza, precisão e fidelidade ao material recuperado. "
+          "Baseie sua resposta exclusivamente no contexto disponível. "
+          "Não invente informações, não complete lacunas com conhecimento externo e não apresente hipóteses como fatos. "
+          "Antes de responder, identifique quais partes do contexto são relevantes para a pergunta. "
+          "Se a resposta puder ser inferida diretamente do contexto, forneça a resposta e explique brevemente a evidência usada. "
+          "Se a pergunta exigir cruzamento de informações entre diferentes trechos, faça essa conexão explicitamente. "
+          "Se o contexto não contiver informação, responda somente: 'Não há informação suficiente no contexto fornecido para responder com segurança.' "
+          "Se houver contradições, ambiguidades ou ausência de detalhes importantes no contexto, informe isso de maneira transparente. "
+          "Mantenha um tom profissional, objetivo e útil."
+      )
     )
     
     return chat_engine
