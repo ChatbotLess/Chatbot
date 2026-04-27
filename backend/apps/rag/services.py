@@ -8,7 +8,11 @@ import time
 if not hasattr(time, "clock"):
     time.clock = time.perf_counter
 
-import aiml
+try:
+    import aiml
+except ModuleNotFoundError:
+    aiml = None
+
 import time
 import warnings
 
@@ -64,6 +68,8 @@ class AimlService:
     @classmethod
     def carregar_kernel(cls):
         if cls.kernel is None:
+            if aiml is None:
+                return None
             cls.kernel = aiml.Kernel()
             cls.kernel.learn(str(AIML_PATH))
 
@@ -72,6 +78,8 @@ class AimlService:
     @classmethod
     def responder(cls, pergunta_usuario):
         kernel = cls.carregar_kernel()
+        if kernel is None:
+            return None
         pergunta_normalizada = pergunta_usuario.upper()
         resposta = kernel.respond(pergunta_normalizada).strip()
 
