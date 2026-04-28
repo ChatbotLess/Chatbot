@@ -1,17 +1,16 @@
 import { useContext } from "react";
+import { FaChartBar, FaEllipsisV, FaFileUpload, FaPlus, FaUser } from "react-icons/fa";
+import { MdLogout, MdOutlineMessage } from "react-icons/md";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthProvider/AuthProvider";
-import { useChatData } from "../hooks/useChatData"
-import { FaUser, FaEllipsisV, FaPlus, FaFileUpload, FaChartBar } from "react-icons/fa";
-import { MdLogout } from "react-icons/md";
-import { MdOutlineMessage } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
-
-
+import { useChatData } from "../hooks/useChatData";
 
 export function Sidebar() {
   const { logOut, user } = useContext(AuthContext);
-  const { data } = useChatData(!!user)
+  const { data, isError, isLoading } = useChatData(!!user);
   const navigate = useNavigate();
+  const location = useLocation();
+  const userName = user?.displayName || user?.email?.split("@")[0] || "Usuario";
 
   const handleLogout = async () => {
     try {
@@ -23,48 +22,105 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="flex flex-col justify-between h-screen w-64 bg-gray-900 text-gray-200 p-4 rounded-r-lg">
+    <aside className="flex h-screen w-[min(18rem,85vw)] shrink-0 flex-col overflow-hidden rounded-r-lg border-r border-gray-800 bg-gray-900 px-3 py-4 text-gray-200 shadow-xl shadow-black/20">
+      <div className="shrink-0">
+        <header
+          className="mb-6 flex cursor-pointer items-center gap-2 px-1 transition hover:opacity-80"
+          onClick={() => navigate("/")}
+        >
+          <MdOutlineMessage className="text-2xl text-white" />
+          <h1 className="text-2xl font-bold text-white">Chatbot</h1>
+        </header>
 
-      <header className="flex items-center gap-2 mb-6 cursor-pointer hover:opacity-80 transition" onClick={() => navigate('/')}>
-        <MdOutlineMessage className="text-2xl text-white" />
-        <h1 className="text-2xl font-bold text-white">Chatbot</h1>
-      </header>
+        <nav className="flex flex-col gap-1">
+          <button
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white"
+            onClick={() => navigate("/")}
+          >
+            <FaPlus className="shrink-0 text-gray-400" />
+            Nova Conversa
+          </button>
 
-      <div className="flex flex-col gap-2">
-        <button className="flex items-center gap-2 hover:bg-gray-800 p-2 rounded transition" onClick={() => navigate('/')}>
-          <FaPlus />
-          Nova Conversa
-        </button>
+          <button
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white"
+            onClick={() => navigate("/upload")}
+          >
+            <FaFileUpload className="shrink-0 text-gray-400" />
+            Inserir Documentos
+          </button>
 
-        <button className="flex items-center gap-2 hover:bg-gray-800 p-2 rounded transition" onClick={() => navigate('/upload')}>
-          <FaFileUpload />
-          Inserir Documentos
-        </button>
-
-        <button className="flex items-center gap-2 hover:bg-gray-800 p-2 rounded transition" onClick={() => navigate('/dashboard')}>
-          <FaChartBar />
-          Dashboard
-        </button>
+          <button
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white"
+            onClick={() => navigate("/dashboard")}
+          >
+            <FaChartBar className="shrink-0 text-gray-400" />
+            Dashboard
+          </button>
+        </nav>
       </div>
 
-      <div className="mt-6 flex-1">
-        <h3 className="font-semibold mb-2 text-gray-400">
-          Histórico de conversa:
-        </h3>
-        {data?.map((chat) => (
-          <div key={chat.id}>
-            {chat.titulo}
-          </div>
-        ))}
-      </div>
-
-      <footer className="flex items-center gap-3 border border-gray-700 rounded-lg p-3 mt-4 hover:bg-gray-800 transition">
-        <FaUser size={24} className="text-gray-300" />
-
-        <div className="flex flex-col flex-1">
-          <span className="font-medium text-white">
-            DHIONATAM {/* NOME DO USUARIO DO BANCO */}
+      <section className="mt-6 flex min-h-0 flex-1 flex-col">
+        <div className="mb-2 flex items-center justify-between px-1">
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            Historico de conversa
+          </h3>
+          <span className="rounded-full bg-gray-800 px-2 py-0.5 text-xs text-gray-400">
+            {data?.length ?? 0}
           </span>
+        </div>
+
+        <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {isLoading && (
+            <div className="rounded-md border border-gray-800 bg-gray-950/60 px-3 py-2 text-sm text-gray-500">
+              Carregando conversas...
+            </div>
+          )}
+
+          {isError && (
+            <div className="rounded-md border border-red-900/60 bg-red-950/30 px-3 py-2 text-sm text-red-200">
+              Nao foi possivel carregar o historico.
+            </div>
+          )}
+
+          {!isLoading && !isError && data?.length === 0 && (
+            <div className="rounded-md border border-dashed border-gray-700 px-3 py-4 text-center text-sm text-gray-500">
+              Nenhuma conversa ainda.
+            </div>
+          )}
+
+          {data?.map((chat) => {
+            const isActive = location.pathname === `/chat/${chat.id}`;
+
+            return (
+              <button
+                key={chat.id}
+                className={`group flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition ${
+                  isActive
+                    ? "bg-blue-600/20 text-white ring-1 ring-blue-500/40"
+                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                }`}
+                onClick={() => navigate(`/chat/${chat.id}`)}
+              >
+                <MdOutlineMessage
+                  className={`shrink-0 ${
+                    isActive ? "text-blue-300" : "text-gray-500 group-hover:text-gray-300"
+                  }`}
+                />
+                <span className="min-w-0 flex-1 truncate">
+                  {chat.titulo || "Conversa sem titulo"}
+                </span>
+                <FaEllipsisV className="shrink-0 text-xs text-gray-600 opacity-0 transition group-hover:opacity-100" />
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <footer className="mt-4 flex shrink-0 items-center gap-3 rounded-lg border border-gray-700 bg-gray-950/50 p-3 transition hover:bg-gray-800">
+        <FaUser size={24} className="shrink-0 text-gray-300" />
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate font-medium uppercase text-white">{userName}</span>
 
           <span className="text-sm text-gray-400">
             (ADMIN) {/* CARGO DO BANCO */}
@@ -73,12 +129,13 @@ export function Sidebar() {
 
         <button
           onClick={handleLogout}
-          className="cursor-pointer text-gray-400 hover:text-white"
+          className="cursor-pointer rounded-md p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white"
+          title="Sair"
+          type="button"
         >
           <MdLogout />
         </button>
       </footer>
-
     </aside>
   );
 }

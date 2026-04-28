@@ -5,7 +5,7 @@ export function Chat() {
   const { conversationId } = useParams();
 
   return (
-    <div className={"flex bg-gray-950 justify-center h-[95vh] items-end"}>
+    <div className="flex h-screen justify-center bg-gray-950">
       <ChatArea2 conversationId={conversationId}/>
     </div>
   )
