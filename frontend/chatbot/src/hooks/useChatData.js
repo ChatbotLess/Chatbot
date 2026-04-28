@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "../services/api";
 
-const fetchData = async () => {
-  const userId = "2eead7ff-ea98-4cae-bb98-ec159c44458d";
+export const CHAT_USER_ID = "560546fc-3701-470e-8263-47ea8c8b4a8d";
 
+const fetchChats = async (userId) => {
   const response = await api.get("/api/chat/listarchats", {
     params: {
       user_id: userId,
@@ -13,13 +13,35 @@ const fetchData = async () => {
   return response.data ?? [];
 };
 
-export function useChatData(enabled = true){
+const fetchChatMessages = async ({ userId, chatId }) => {
+  const response = await api.get("/api/chat/listarmensagem", {
+    params: {
+      userid: userId,
+      chatID: chatId,
+    },
+  });
+
+  return response.data ?? [];
+};
+
+export function useChatData(enabled = true, userId = CHAT_USER_ID){
   const query = useQuery({
-    queryFn: fetchData,
-    queryKey: ['chat-data'],
+    queryFn: () => fetchChats(userId),
+    queryKey: ['chat-data', userId],
     refetchOnWindowFocus: false,
-    enabled
+    enabled: enabled && Boolean(userId),
   })
+
+  return query;
+}
+
+export function useChatMessages(chatId, enabled = true, userId = CHAT_USER_ID) {
+  const query = useQuery({
+    queryFn: () => fetchChatMessages({ userId, chatId }),
+    queryKey: ['chat-messages', userId, chatId],
+    refetchOnWindowFocus: false,
+    enabled: enabled && Boolean(userId) && Boolean(chatId),
+  });
 
   return query;
 }
