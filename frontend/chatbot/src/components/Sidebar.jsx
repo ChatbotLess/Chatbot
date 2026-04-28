@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthProvider/AuthProvider";
+import { useChatData } from "../hooks/useChatData"
 import { FaUser, FaEllipsisV, FaPlus, FaFileUpload, FaChartBar } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
 import { MdOutlineMessage } from "react-icons/md";
@@ -8,9 +9,10 @@ import { useNavigate } from "react-router-dom";
 
 
 export function Sidebar() {
-  const { logOut } = useContext(AuthContext);
+  const { logOut, user } = useContext(AuthContext);
+  const { data } = useChatData(!!user)
   const navigate = useNavigate();
-  
+
   const handleLogout = async () => {
     try {
       await logOut();
@@ -49,7 +51,11 @@ export function Sidebar() {
         <h3 className="font-semibold mb-2 text-gray-400">
           Histórico de conversa:
         </h3>
-        {/* FAZER O MAP DOS CHAT DO BANCO */}
+        {data?.map((chat) => (
+          <div key={chat.id}>
+            {chat.titulo}
+          </div>
+        ))}
       </div>
 
       <footer className="flex items-center gap-3 border border-gray-700 rounded-lg p-3 mt-4 hover:bg-gray-800 transition">
