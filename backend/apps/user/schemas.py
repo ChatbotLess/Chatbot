@@ -10,4 +10,4 @@ class UserSchemaOut(ModelSchema):
 class UserSchemaIn(ModelSchema):
     class Meta:
         model = User
-        exclude = ['last_login', 'user_permissions', 'is_superuser', 'groups']        
+        exclude = ['id','last_login', 'user_permissions', 'is_superuser', 'groups','is_staff','created_at','updated_at']        

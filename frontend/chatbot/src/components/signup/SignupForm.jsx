@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthProvider/AuthProvider";
 import { useForm } from 'react-hook-form';
+import api from "../../services/api";
 
 
 export function SignupForm() {
@@ -14,7 +15,17 @@ export function SignupForm() {
         setIsLoading(true);
 
         try {
-            await createUser(data.email, data.senha);
+            const credential = await createUser(data.email, data.senha);
+
+            const payload = {
+                firebase_uid: credential.user.uid,
+                email: credential.user.email,
+                password: data.senha,
+                name: data.nome
+            };
+
+            await api.post("/api/users/User/", payload);
+            
             navigate("/login");
         } catch (error) {
             console.error("Error code:", error.code, "Error message:", error.message);
@@ -108,7 +119,7 @@ export function SignupForm() {
                     </button>
                     <button
                         type="button"
-                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900" 
+                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900"
                         onClick={() => navigate('/login')}
                     >
                         Voltar

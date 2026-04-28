@@ -326,9 +326,7 @@
 
 <category>
     <pattern>*</pattern>
-    <template>
-        Desculpe, não encontrei essa informação na base de documentos. Você pode reformular sua pergunta?
-    </template>
+    <template>__RAG__</template>
 </category>
 
 </aiml>

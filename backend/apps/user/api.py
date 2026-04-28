@@ -16,7 +16,7 @@ def me(request, idUsuario: str):
 
 @router.post("/User/",response=UserSchemaOut, tags=["Usuario"])
 def inserir_usuario(request, data: UserSchemaIn):
-    user = User(name=data.name, email=data.email)
+    user = User(name=data.name, email=data.email, firebase_uid=data.firebase_uid)
     user.set_password(data.password)
     user.save()
     return user
