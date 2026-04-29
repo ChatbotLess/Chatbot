@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "../services/api";
 
-export const CHAT_USER_ID = "560546fc-3701-470e-8263-47ea8c8b4a8d";
+export const CHAT_USER_ID = "2eead7ff-ea98-4cae-bb98-ec159c44458d";
 
 const fetchChats = async (userId) => {
   const response = await api.get("/api/chat/listarchats", {
@@ -21,7 +21,9 @@ const fetchChatMessages = async ({ userId, chatId }) => {
     },
   });
 
-  return response.data ?? [];
+  return [...(response.data ?? [])].sort((firstMessage, secondMessage) => (
+    Number(firstMessage.id) - Number(secondMessage.id)
+  ));
 };
 
 export function useChatData(enabled = true, userId = CHAT_USER_ID){
