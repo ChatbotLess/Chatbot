@@ -104,7 +104,6 @@ class AimlResposta:
             role="assistant",
             conteudo=self.resposta,
             pergunta_original=self.pergunta_usuario,
-            intencao="aiml"
         )
 
         yield self.resposta
@@ -135,7 +134,6 @@ class RagResposta:
                     role="assistant",
                     conteudo=texto_completo,
                     pergunta_original=self.pergunta_usuario,
-                    intencao="rag"
                 )
 
                 salvar_metadados(resposta, response.source_nodes)
@@ -153,7 +151,6 @@ class AimlCreator:
             )
 
         return None
-
 
 class RagCreator:
     def factory_method(self, pergunta_usuario, chat_id):

@@ -10,6 +10,7 @@ import {
 import { createContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { auth } from "../../firebase";
+import api from "../../services/api";
 
 export const AuthContext = createContext(null);
 
