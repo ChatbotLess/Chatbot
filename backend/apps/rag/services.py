@@ -86,7 +86,7 @@ class AimlService:
         if not resposta:
             return None
 
-        if resposta == "__RAG__":
+        if "__RAG__" in resposta.split():
             return None
 
         return resposta
@@ -115,6 +115,8 @@ class RagResposta:
         self.chat_id = chat_id
 
     def stream(self):
+        yield ""  
+
         rag_instance = inicializar_rag()
         chat_engine = rag_instance.criar_chat_engine(self.chat_id)
 
@@ -163,8 +165,7 @@ class RagCreator:
 class RespostaResolver:
     def __init__(self):
         self.creators = [
-            AimlCreator(),
-            RagCreator()
+            AimlCreator()
         ]
 
     def criar_resposta(self, pergunta_usuario, chat_id):
@@ -220,7 +221,7 @@ def fazer_pergunta(pergunta_usuario, chat_id=None, usuario_id=None):
 
             yield MENSAGEM_SEM_DOCS
 
-        return stream_sem_documentos()
+        return chat_id, stream_sem_documentos()
 
     factory = RespostaResolver()
 
@@ -229,17 +230,17 @@ def fazer_pergunta(pergunta_usuario, chat_id=None, usuario_id=None):
         chat_id=chat_id
     )
 
-    return resposta.stream()
+    return chat_id, resposta.stream()
 
 
 def responder_mensagem(userid, chat_id=None, pergunta=""):
-    resposta = fazer_pergunta(
+    chat_id, stream = fazer_pergunta(
         pergunta_usuario=pergunta,
         chat_id=chat_id,
         usuario_id=userid
     )
 
-    return resposta
+    return chat_id, stream
 
 
 def indexar_documento_no_rag(caminho: str, tipo: str, data):

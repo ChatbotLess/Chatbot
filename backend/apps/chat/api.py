@@ -19,13 +19,13 @@ def _validar_tipo_feedback(tipo: str) -> str:
 @router.get("/listarchats", response=list[ChatSchema], tags=["Chat"])
 def listar_chats(request, user_id: str):
     usuario = get_object_or_404(User, id=user_id)
-    return usuario.chats.all()
+    return usuario.chats.order_by("-data", "-id")
 
 @router.get("/listarmensagem", response=list[MensagemSchemaOut], tags=["Chat"])
 def listar_mensagem(request, userid: str, chatID: str):
     usuario = get_object_or_404(User, id=userid)
     chat = get_object_or_404(Chat, id=chatID, usuario=usuario)
-    mensagens = chat.mensagens.all() 
+    mensagens = chat.mensagens.order_by("id")
     return mensagens
 
 @router.post("/chat/", response=ChatSchema, tags=["Chat"])
