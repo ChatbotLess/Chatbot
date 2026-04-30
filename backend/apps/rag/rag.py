@@ -25,8 +25,12 @@ class Rag():
   def __init__(self, temperature=0.5):
     self.temperature = temperature
     # USA O BANCO DE DADOS DO DJANGO
-    self.connection_string = "postgresql://postgres:postgres@localhost:5432"
-    self.db_name = "chatbot_db"  # Banco do Django
+    db_user = os.getenv("DB_USER", "postgres")
+    db_password = os.getenv("DB_PASSWORD", "postgres")
+    db_host = os.getenv("DB_HOST", "localhost")
+    db_port = os.getenv("DB_PORT", "5432")
+    self.connection_string = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}"
+    self.db_name = os.getenv("DB_NAME", "chatbot_db")  # Banco do Django
 
   def carregar_llm(self):
     #LENDO API KEY
