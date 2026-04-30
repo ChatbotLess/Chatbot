@@ -23,7 +23,7 @@ export function Promptbar() {
 
     mutate(
       {
-        userid: "2eead7ff-ea98-4cae-bb98-ec159c44458d",
+        userid: "2c70b932-81ba-4249-aed8-7be2fa65905c",
         message,
         chatID: conversationId ?? null,
       },
