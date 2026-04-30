@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "../services/api";
 
-export const CHAT_USER_ID = "2eead7ff-ea98-4cae-bb98-ec159c44458d";
+export const CHAT_USER_ID = "2c70b932-81ba-4249-aed8-7be2fa65905c";
 
 const fetchChats = async (userId) => {
   const response = await api.get("/api/chat/listarchats", {
