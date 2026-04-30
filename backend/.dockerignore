@@ -1,0 +1,6 @@
+.venv
+__pycache__
+*.pyc
+.git
+.vscode
+test_db.sqlite3

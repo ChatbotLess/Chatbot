@@ -1,12 +1,11 @@
-from ninja import Router, UploadedFile, Form, File
-from django.core.files.storage import FileSystemStorage
+from ninja import Router, UploadedFile, File
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from .schemas import DocumentoSchemaOut, BaseConhecimentoIn, ErroSchema
 from .models import Documento, Base_Conhecimento
 from apps.user.models import User
-from apps.chat.text_processing import run_text_processing_flow
-from apps.rag.services import indexar_documento_no_rag
+from apps.base_conhecimento.tasks import processar_documento_rag
 
 router = Router()
 
@@ -54,19 +53,9 @@ def upload(request, base_id : int, user_id: str, file: File[UploadedFile], tipo:
 
   try:
     doc.status = Documento.StatusDocumento.PROCESSANDO
-    doc.caminho.save(file.name, file, save=True)
-
-    run_text_processing_flow(doc.caminho.path)
-    
-    try:
-      indexar_documento_no_rag(doc.caminho.path,tipo,doc.data_atualizacao,)
-    except Exception as e:
-      doc.status = Documento.StatusDocumento.ERRO
-      doc.save(update_fields=["status"])
-      return {"erro": str(e)}
-
-    doc.status = Documento.StatusDocumento.CONCLUIDO
-    doc.save(update_fields=["status"])
+    with transaction.atomic():
+      doc.caminho.save(file.name, file, save=True)
+      transaction.on_commit(lambda: processar_documento_rag.delay(doc.id))
   except Exception as e:
     doc.status = Documento.StatusDocumento.ERRO
     doc.save(update_fields=["status"])

@@ -27,8 +27,8 @@ def run_text_processing_flow(path) -> None:
     # Mantido para preservar o fluxo solicitado, mesmo sem uso direto abaixo.
     _ = custom_pipeline
 
-    output = processor.process_pdf(PDF)
-    print(f"PDF gerado: {output}")
+    #output = processor.process_pdf(PDF)
+    #print(f"PDF gerado: {output}")
 
 
 __all__ = [
