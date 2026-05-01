@@ -1,5 +1,6 @@
 from ninja import Router
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import ValidationError
 from ninja.errors import HttpError
 from apps.user.models import User
 from apps.chat.models import Chat, Mensagem, Feedback
@@ -8,13 +9,6 @@ from .schemas import ChatSchema, FeedbackSchemaIn, FeedbackSchemaOut
 
 router = Router()
 
-
-def _validar_tipo_feedback(tipo: str) -> str:
-    tipo_normalizado = tipo.strip().upper()
-    tipos_validos = {Feedback.MensagemFeedback.LIKE, Feedback.MensagemFeedback.DISLIKE}
-    if tipo_normalizado not in tipos_validos:
-        raise HttpError(400, "Tipo de feedback invalido. Use LIKE ou DISLIKE.")
-    return tipo_normalizado
 
 @router.get("/listarchats", response=list[ChatSchema], tags=["Chat"])
 def listar_chats(request, user_id: str):
@@ -36,42 +30,60 @@ def chat(request, data: ChatSchema, user_id: str):
     return chat
 
 
-@router.get("/listarfeedback", response=list[FeedbackSchemaOut], tags=["Chat"])
+@router.get("/listarfeedback", response=list[FeedbackSchemaOut], tags=["Feedback"])
 def listar_feedback(request, userid: str, chatID: str):
     usuario = get_object_or_404(User, id=userid)
     chat = get_object_or_404(Chat, id=chatID, usuario=usuario)
     return Feedback.objects.filter(mensagem__chat=chat).select_related("mensagem")
 
 
-@router.post("/feedback", response=FeedbackSchemaOut, tags=["Chat"])
+@router.post("/feedback", response=FeedbackSchemaOut, tags=["Feedback"])
 def feedback(request, userid: str, chatID: str, mensagemID: str, tipo: str, mensagem_feedback: str = ""):
     usuario = get_object_or_404(User, id=userid)
     chat = get_object_or_404(Chat, id=chatID, usuario=usuario)
     mensagem = get_object_or_404(Mensagem, id=mensagemID, chat=chat)
 
-    feedback_tipo = _validar_tipo_feedback(tipo)
+    feedback_tipo = tipo.strip().upper()
+    mensagem_feedback = mensagem_feedback or ""
 
-    feedback_obj, _ = Feedback.objects.update_or_create(
-        mensagem=mensagem,
-        defaults={
-            "tipo": feedback_tipo,
-            "mensagem_feedback": mensagem_feedback or ""
-        }
-    )
+    if feedback_tipo == Feedback.MensagemFeedback.DISLIKE and not mensagem_feedback.strip():
+        raise HttpError(400, "Mensagem do feedback e obrigatoria para feedback negativo.")
+
+    feedback_obj = Feedback.objects.filter(mensagem=mensagem).first() or Feedback(mensagem=mensagem)
+    feedback_obj.tipo = feedback_tipo
+    feedback_obj.mensagem_feedback = mensagem_feedback
+
+    try:
+        feedback_obj.full_clean(exclude=["mensagem_feedback"])
+        feedback_obj.save()
+    except ValidationError as e:
+        if "tipo" in getattr(e, "message_dict", {}):
+            raise HttpError(400, "Tipo de feedback invalido. Use LIKE ou DISLIKE.")
+        raise HttpError(400, e.messages)
+
     return feedback_obj
 
 
-@router.post("/mensagens/{mensagem_id}/feedback", response=FeedbackSchemaOut, tags=["Chat"])
+@router.post("/mensagens/{mensagem_id}/feedback", response=FeedbackSchemaOut, tags=["Feedback"])
 def registrar_feedback(request, mensagem_id: str, data: FeedbackSchemaIn):
     mensagem = get_object_or_404(Mensagem, id=mensagem_id)
 
-    tipo = _validar_tipo_feedback(data.tipo)
+    tipo = data.tipo.strip().upper()
+    mensagem_feedback = data.mensagem_feedback or ""
 
-    feedback, _ = Feedback.objects.update_or_create(
-        mensagem=mensagem,
-        defaults={
-            "tipo": tipo,
-            "mensagem_feedback": data.mensagem_feedback or ""
-        }
-    )
+    if tipo == Feedback.MensagemFeedback.DISLIKE and not mensagem_feedback.strip():
+        raise HttpError(400, "Mensagem do feedback e obrigatoria para feedback negativo.")
+
+    feedback = Feedback.objects.filter(mensagem=mensagem).first() or Feedback(mensagem=mensagem)
+    feedback.tipo = tipo
+    feedback.mensagem_feedback = mensagem_feedback
+
+    try:
+        feedback.full_clean(exclude=["mensagem_feedback"])
+        feedback.save()
+    except ValidationError as e:
+        if "tipo" in getattr(e, "message_dict", {}):
+            raise HttpError(400, "Tipo de feedback invalido. Use LIKE ou DISLIKE.")
+        raise HttpError(400, e.messages)
+
     return feedback
