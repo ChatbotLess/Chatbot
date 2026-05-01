@@ -2,18 +2,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from ninja.errors import HttpError
 
-from apps.chat.api import _validar_tipo_feedback, feedback
+from apps.chat.api import feedback
 from apps.chat.models import Chat, Feedback, Mensagem
-
-
-class FeedbackValidationTests(TestCase):
-    def test_validar_tipo_feedback_accepts_like_and_dislike(self):
-        self.assertEqual(_validar_tipo_feedback(" like "), Feedback.MensagemFeedback.LIKE)
-        self.assertEqual(_validar_tipo_feedback("dislike"), Feedback.MensagemFeedback.DISLIKE)
-
-    def test_validar_tipo_feedback_rejects_invalid_value(self):
-        with self.assertRaises(HttpError):
-            _validar_tipo_feedback("spam")
 
 
 class FeedbackApiTests(TestCase):
@@ -58,3 +48,24 @@ class FeedbackApiTests(TestCase):
         self.assertEqual(updated.id, created.id)
         self.assertEqual(updated.tipo, Feedback.MensagemFeedback.DISLIKE)
         self.assertEqual(updated.mensagem_feedback, "Nao ajudou")
+
+    def test_feedback_rejects_invalid_tipo(self):
+        with self.assertRaises(HttpError):
+            feedback(
+                request=None,
+                userid=str(self.user.id),
+                chatID=str(self.chat.id),
+                mensagemID=str(self.mensagem.id),
+                tipo="spam",
+            )
+
+    def test_feedback_negativo_exige_mensagem(self):
+        with self.assertRaises(HttpError):
+            feedback(
+                request=None,
+                userid=str(self.user.id),
+                chatID=str(self.chat.id),
+                mensagemID=str(self.mensagem.id),
+                tipo="DISLIKE",
+                mensagem_feedback="",
+            )
