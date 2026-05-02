@@ -1,9 +1,16 @@
-import { memo, useEffect, useRef } from "react";
-import rehypeRaw from "rehype-raw";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { TbThumbDown, TbThumbUp } from "react-icons/tb";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { FeedbackModal } from "../FeedbackModal";
 import { Promptbar } from "../Promptbar";
-import { useChatMessages } from "../../hooks/useChatData";
+import {
+  CHAT_USER_ID,
+  useChatFeedbacks,
+  useChatMessages,
+} from "../../hooks/useChatData";
+import { useFeedbackMutate } from "../../hooks/useFeedbackMutate";
 import { useStream } from "../../context/StreamContext/StreamProvider";
 
 const markdownComponents = {
@@ -15,6 +22,7 @@ const markdownComponents = {
       className="text-blue-300 underline decoration-blue-300/50 underline-offset-2 hover:text-blue-200"
     />
   ),
+
   code: ({ children, ...props }) => (
     <code
       {...props}
@@ -23,69 +31,290 @@ const markdownComponents = {
       {children}
     </code>
   ),
-  h1: ({ ...props }) => <h1 {...props} className="text-lg font-semibold text-white" />,
-  h2: ({ ...props }) => <h2 {...props} className="text-base font-semibold text-white" />,
-  h3: ({ ...props }) => <h3 {...props} className="text-base font-semibold text-white" />,
-  ol: ({ ...props }) => <ol {...props} className="list-decimal space-y-2 pl-5" />,
+
+  h1: ({ ...props }) => (
+    <h1 {...props} className="text-lg font-semibold text-white" />
+  ),
+
+  h2: ({ ...props }) => (
+    <h2 {...props} className="text-base font-semibold text-white" />
+  ),
+
+  h3: ({ ...props }) => (
+    <h3 {...props} className="text-base font-semibold text-white" />
+  ),
+
+  ol: ({ ...props }) => (
+    <ol {...props} className="list-decimal space-y-2 pl-5" />
+  ),
+
   p: ({ ...props }) => <p {...props} />,
+
   pre: ({ ...props }) => (
     <pre
       {...props}
       className="overflow-x-auto rounded-md bg-gray-950 p-3 text-xs leading-5 text-gray-100"
     />
   ),
-  strong: ({ ...props }) => <strong {...props} className="font-semibold text-white" />,
+
+  strong: ({ ...props }) => (
+    <strong {...props} className="font-semibold text-white" />
+  ),
+
   table: ({ ...props }) => (
     <div className="overflow-x-auto rounded-md border border-gray-700">
       <table {...props} className="w-full border-collapse text-left text-sm" />
     </div>
   ),
-  tbody: ({ ...props }) => <tbody {...props} className="divide-y divide-gray-800" />,
+
+  tbody: ({ ...props }) => (
+    <tbody {...props} className="divide-y divide-gray-800" />
+  ),
+
   td: ({ ...props }) => (
-    <td {...props} className="border-l border-gray-800 px-3 py-2 align-top first:border-l-0" />
+    <td
+      {...props}
+      className="border-l border-gray-800 px-3 py-2 align-top first:border-l-0"
+    />
   ),
+
   th: ({ ...props }) => (
-    <th {...props} className="border-l border-gray-700 bg-gray-950 px-3 py-2 align-top font-semibold text-white first:border-l-0" />
+    <th
+      {...props}
+      className="border-l border-gray-700 bg-gray-950 px-3 py-2 align-top font-semibold text-white first:border-l-0"
+    />
   ),
-  thead: ({ ...props }) => <thead {...props} className="border-b border-gray-700" />,
-  ul: ({ ...props }) => <ul {...props} className="list-disc space-y-2 pl-5" />,
+
+  thead: ({ ...props }) => (
+    <thead {...props} className="border-b border-gray-700" />
+  ),
+
+  ul: ({ ...props }) => (
+    <ul {...props} className="list-disc space-y-2 pl-5" />
+  ),
 };
 
 const MarkdownMessage = memo(function MarkdownMessage({ content }) {
   return (
     <div className="space-y-3">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]}
-        components={markdownComponents}
-      >
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
         {content}
       </ReactMarkdown>
     </div>
   );
 });
 
-const MessageBubble = memo(function MessageBubble({ message }) {
+function getFeedbackMessageId(feedback) {
+  const message = feedback?.mensagem;
+
+  if (message && typeof message === "object") {
+    return message.id;
+  }
+
+  return message;
+}
+
+function getErrorMessage(error) {
+  const detail = error?.response?.data?.detail;
+
+  if (typeof detail === "string") return detail;
+
+  if (Array.isArray(detail)) {
+    const messages = detail
+      .map((item) => item?.msg || item?.message)
+      .filter(Boolean)
+      .join(" ");
+
+    return messages || "Dados do feedback invalidos.";
+  }
+
+  if (detail && typeof detail === "object") {
+    return detail.msg || detail.message || "Nao foi possivel registrar o feedback.";
+  }
+
+  return "Nao foi possivel registrar o feedback.";
+}
+
+const FeedbackActions = memo(function FeedbackActions({
+  chatId,
+  initialFeedback,
+  messageId,
+}) {
+  const { mutate, isPending } = useFeedbackMutate();
+  const queryClient = useQueryClient();
+
+  const [submittedFeedback, setSubmittedFeedback] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [feedbackText, setFeedbackText] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const selectedFeedback = submittedFeedback?.tipo ?? initialFeedback?.tipo ?? null;
+
+  const savedFeedbackText =
+    submittedFeedback?.mensagem_feedback ??
+    initialFeedback?.mensagem_feedback ??
+    "";
+
+  const submitFeedback = ({ tipo, mensagem_feedback = "" }) => {
+    if (!chatId || messageId === undefined || messageId === null || isPending) return;
+
+    mutate(
+      {
+        chatId,
+        messageId,
+        tipo,
+        mensagem_feedback,
+      },
+      {
+        onSuccess: (feedback) => {
+          setSubmittedFeedback(feedback ?? { tipo, mensagem_feedback });
+          setIsModalOpen(false);
+          setFeedbackText(feedback?.mensagem_feedback ?? mensagem_feedback);
+          setErrorMessage("");
+
+          if (chatId) {
+            queryClient.invalidateQueries({
+              queryKey: ["chat-feedback", CHAT_USER_ID, chatId],
+            });
+          }
+        },
+
+        onError: (error) => {
+          setErrorMessage(getErrorMessage(error));
+        },
+      }
+    );
+  };
+
+  const handleLike = () => {
+    setErrorMessage("");
+    submitFeedback({ tipo: "LIKE" });
+  };
+
+  const handleDislikeClick = () => {
+    setErrorMessage("");
+    setFeedbackText(savedFeedbackText);
+    setIsModalOpen(true);
+  };
+
+  const handleDislikeSubmit = (event) => {
+    event.preventDefault();
+
+    const trimmedFeedback = feedbackText.trim();
+
+    if (!trimmedFeedback) {
+      setErrorMessage("Descreva rapidamente o motivo do dislike.");
+      return;
+    }
+
+    submitFeedback({
+      tipo: "DISLIKE",
+      mensagem_feedback: trimmedFeedback,
+    });
+  };
+
+  return (
+    <>
+      <div className="mt-2 flex items-center gap-1">
+        <button
+          type="button"
+          onClick={handleLike}
+          disabled={isPending}
+          className={`rounded-md p-1.5 transition disabled:opacity-50 ${
+            selectedFeedback === "LIKE"
+              ? "bg-blue-500/20 text-blue-200"
+              : "text-gray-500 hover:bg-gray-800 hover:text-gray-200"
+          }`}
+          aria-label="Curtir resposta"
+          title="Curtir resposta"
+        >
+          <TbThumbUp size={18} />
+        </button>
+
+        <button
+          type="button"
+          onClick={handleDislikeClick}
+          disabled={isPending}
+          className={`rounded-md p-1.5 transition disabled:opacity-50 ${
+            selectedFeedback === "DISLIKE"
+              ? "bg-red-500/20 text-red-200"
+              : "text-gray-500 hover:bg-gray-800 hover:text-gray-200"
+          }`}
+          aria-label="Nao curtir resposta"
+          title="Nao curtir resposta"
+        >
+          <TbThumbDown size={18} />
+        </button>
+      </div>
+
+      {errorMessage && !isModalOpen && (
+        <p className="mt-1 text-xs text-red-300">{errorMessage}</p>
+      )}
+
+      {isModalOpen && (
+        <FeedbackModal
+          errorMessage={errorMessage}
+          feedbackText={feedbackText}
+          isPending={isPending}
+          onChange={setFeedbackText}
+          onClose={() => {
+            setIsModalOpen(false);
+            setErrorMessage("");
+          }}
+          onSubmit={handleDislikeSubmit}
+        />
+      )}
+    </>
+  );
+});
+
+const MessageBubble = memo(function MessageBubble({
+  chatId,
+  feedback,
+  message,
+}) {
   const isUser = message.role === "user";
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-      <article
-        className={`max-w-[85%] break-words rounded-lg px-4 py-3 text-sm leading-6 shadow-sm ${
-          isUser
-            ? "whitespace-pre-wrap bg-blue-600 text-white"
-            : "border border-gray-800 bg-gray-900 text-gray-100"
-        }`}
-      >
-        {isUser ? message.conteudo : <MarkdownMessage content={message.conteudo} />}
-      </article>
+      <div className={`max-w-[85%] ${isUser ? "flex justify-end" : ""}`}>
+        <div
+          className={
+            isUser ? "flex flex-col items-end" : "flex flex-col items-start"
+          }
+        >
+          <article
+            className={`break-words rounded-lg px-4 py-3 text-sm leading-6 shadow-sm ${
+              isUser
+                ? "whitespace-pre-wrap bg-blue-600 text-white"
+                : "border border-gray-800 bg-gray-900 text-gray-100"
+            }`}
+          >
+            {isUser ? (
+              message.conteudo
+            ) : (
+              <MarkdownMessage content={message.conteudo} />
+            )}
+          </article>
+
+          {!isUser && message.id !== undefined && message.id !== null && (
+            <FeedbackActions
+              chatId={chatId}
+              initialFeedback={feedback}
+              messageId={message.id}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 });
 
 function findLastMessageIndex(messages, predicate) {
   for (let index = messages.length - 1; index >= 0; index -= 1) {
-    if (predicate(messages[index])) return index;
+    if (predicate(messages[index])) {
+      return index;
+    }
   }
 
   return -1;
@@ -93,6 +322,7 @@ function findLastMessageIndex(messages, predicate) {
 
 export function ChatArea2({ conversationId }) {
   const messagesEndRef = useRef(null);
+
   const { pendingUserMessage, streamingText, isStreaming } = useStream();
 
   const {
@@ -101,11 +331,68 @@ export function ChatArea2({ conversationId }) {
     isLoading,
   } = useChatMessages(conversationId, Boolean(conversationId));
 
+  const { data: feedbacks = [] } = useChatFeedbacks(
+    conversationId,
+    Boolean(conversationId)
+  );
+
   const lastMessageId = messages.at(-1)?.id;
 
-  // Scroll automático sempre que chegam novos tokens, mensagens ou pergunta pendente
+  const feedbackByMessageId = useMemo(() => {
+    return new Map(
+      feedbacks.map((feedback) => [
+        String(getFeedbackMessageId(feedback)),
+        feedback,
+      ])
+    );
+  }, [feedbacks]);
+
+  const showStreaming = (isStreaming || streamingText) && !isLoading;
+
+  const displayedMessages = useMemo(() => {
+    if (!showStreaming) {
+      return messages;
+    }
+
+    const hiddenMessageIndexes = new Set();
+
+    if (pendingUserMessage) {
+      const pendingUserIndex = findLastMessageIndex(
+        messages,
+        (message) =>
+          message.role === "user" && message.conteudo === pendingUserMessage
+      );
+
+      if (pendingUserIndex >= 0) {
+        hiddenMessageIndexes.add(pendingUserIndex);
+      }
+    }
+
+    if (streamingText) {
+      const streamedAssistantIndex = findLastMessageIndex(
+        messages,
+        (message) =>
+          message.role === "assistant" &&
+          message.conteudo?.trim() === streamingText.trim()
+      );
+
+      if (streamedAssistantIndex >= 0) {
+        hiddenMessageIndexes.add(streamedAssistantIndex);
+      }
+    }
+
+    if (!hiddenMessageIndexes.size) {
+      return messages;
+    }
+
+    return messages.filter((_, index) => !hiddenMessageIndexes.has(index));
+  }, [messages, showStreaming, pendingUserMessage, streamingText]);
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({
+      block: "end",
+      behavior: isStreaming ? "auto" : "smooth",
+    });
   }, [
     conversationId,
     isLoading,
@@ -113,42 +400,8 @@ export function ChatArea2({ conversationId }) {
     lastMessageId,
     pendingUserMessage,
     streamingText,
+    isStreaming,
   ]);
-
-  // Decide se deve mostrar os balões de streaming
-  const showStreaming = (isStreaming || streamingText) && !isLoading;
-
-  // Durante o streaming, o backend já salvou as mensagens no banco.
-  // Para evitar duplicação entre os balões de stream e os itens do DB,
-  // ocultamos mensagens do banco que já estão sendo exibidas pelo streaming:
-  //   1) Última msg do usuário (salva antes do stream começar)
-  //   2) Última msg do assistente (salva ao fim do stream, antes do clearStream)
-  const hiddenMessageIndexes = new Set();
-
-  if (showStreaming && pendingUserMessage) {
-    const pendingUserIndex = findLastMessageIndex(
-      messages,
-      (message) => message.role === "user" && message.conteudo === pendingUserMessage
-    );
-
-    if (pendingUserIndex >= 0) hiddenMessageIndexes.add(pendingUserIndex);
-  }
-
-  if (showStreaming && streamingText) {
-    const streamedAssistantIndex = findLastMessageIndex(
-      messages,
-      (message) =>
-        message.role === "assistant" &&
-        message.conteudo?.trim() === streamingText.trim()
-    );
-
-    if (streamedAssistantIndex >= 0) hiddenMessageIndexes.add(streamedAssistantIndex);
-  }
-
-  const displayedMessages = hiddenMessageIndexes.size
-    ? messages.filter((_, index) => !hiddenMessageIndexes.has(index))
-    : messages;
-
 
   return (
     <div className="flex h-full w-full max-w-[760px] flex-col px-4 py-6">
@@ -171,38 +424,42 @@ export function ChatArea2({ conversationId }) {
           </div>
         )}
 
-        {/* Mensagens confirmadas no banco */}
         {!isLoading && !isError && displayedMessages.length > 0 && (
           <div className="flex flex-col gap-4">
             {displayedMessages.map((message) => (
-              <MessageBubble key={message.id} message={message} />
+              <MessageBubble
+                key={message.id}
+                chatId={conversationId}
+                feedback={feedbackByMessageId.get(String(message.id))}
+                message={message}
+              />
             ))}
           </div>
         )}
 
-        {/* Balões de streaming (mensagem do usuário + resposta chegando) */}
         {showStreaming && (
-          <div className={`flex flex-col gap-4 ${messages.length > 0 ? "mt-4" : ""}`}>
-            {/* Mensagem do usuário pendente */}
+          <div
+            className={`flex flex-col gap-4 ${
+              messages.length > 0 ? "mt-4" : ""
+            }`}
+          >
             {pendingUserMessage && (
               <div className="flex justify-end">
-                <article className="max-w-[85%] break-words rounded-lg px-4 py-3 text-sm leading-6 shadow-sm whitespace-pre-wrap bg-blue-600 text-white">
+                <article className="max-w-[85%] break-words rounded-lg bg-blue-600 px-4 py-3 text-sm leading-6 text-white shadow-sm whitespace-pre-wrap">
                   {pendingUserMessage}
                 </article>
               </div>
             )}
 
-            {/* Resposta chegando token a token */}
             <div className="flex justify-start">
-              <article className="max-w-[85%] break-words rounded-lg px-4 py-3 text-sm leading-6 shadow-sm border border-gray-800 bg-gray-900 text-gray-100">
+              <article className="max-w-[85%] break-words rounded-lg border border-gray-800 bg-gray-900 px-4 py-3 text-sm leading-6 text-gray-100 shadow-sm">
                 {streamingText ? (
                   <MarkdownMessage content={streamingText} />
                 ) : (
-                  // Enquanto não chegou nenhum token ainda, mostra animação de "digitando"
-                  <div className="flex gap-1 items-center py-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce [animation-delay:-0.3s]" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce [animation-delay:-0.15s]" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" />
+                  <div className="flex items-center gap-1 py-1">
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400 [animation-delay:-0.3s]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400 [animation-delay:-0.15s]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-gray-400" />
                   </div>
                 )}
               </article>

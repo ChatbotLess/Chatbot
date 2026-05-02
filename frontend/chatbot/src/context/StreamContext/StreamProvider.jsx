@@ -5,16 +5,14 @@ export const StreamContext = createContext(null);
 const STREAM_FLUSH_INTERVAL_MS = 30;
 
 export function StreamProvider({ children }) {
-  // Mensagem do usuário que foi enviada (exibida imediatamente enquanto processa)
   const [pendingUserMessage, setPendingUserMessage] = useState(null);
-  // Texto acumulado da resposta em streaming
   const [streamingText, setStreamingText] = useState("");
-  // Se está streamando no momento
   const [isStreaming, setIsStreaming] = useState(false);
 
-  const abortRef = useRef(null);
   const textBufferRef = useRef("");
   const flushTimeoutRef = useRef(null);
+  const streamIdRef = useRef(0);
+  const readerRef = useRef(null);
 
   const clearPendingFlush = useCallback(() => {
     if (flushTimeoutRef.current) {
@@ -37,38 +35,62 @@ export function StreamProvider({ children }) {
     }, STREAM_FLUSH_INTERVAL_MS);
   }, []);
 
-  const startStream = useCallback(async (stream, userMessage) => {
-    setPendingUserMessage(userMessage);
-    textBufferRef.current = "";
-    setStreamingText("");
-    setIsStreaming(true);
+  const startStream = useCallback(
+    async (stream, userMessage) => {
+      const streamId = ++streamIdRef.current;
 
-    const reader = stream.getReader();
-    const decoder = new TextDecoder();
+      clearPendingFlush();
+      readerRef.current?.cancel?.();
+      readerRef.current = null;
+      textBufferRef.current = "";
+      setPendingUserMessage(userMessage);
+      setStreamingText("");
+      setIsStreaming(true);
 
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        textBufferRef.current += chunk;
-        scheduleStreamingFlush();
+      const reader = stream.getReader();
+      readerRef.current = reader;
+
+      const decoder = new TextDecoder();
+
+      try {
+        while (streamId === streamIdRef.current) {
+          const { done, value } = await reader.read();
+
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          textBufferRef.current += chunk;
+          scheduleStreamingFlush();
+        }
+
+        const remainingText = decoder.decode();
+
+        if (remainingText && streamId === streamIdRef.current) {
+          textBufferRef.current += remainingText;
+        }
+      } catch (error) {
+        if (error?.name !== "AbortError") {
+          console.error("Erro durante streaming:", error);
+        }
+      } finally {
+        if (streamId === streamIdRef.current) {
+          flushStreamingText();
+          setIsStreaming(false);
+          readerRef.current = null;
+        }
       }
-
-      const remainingText = decoder.decode();
-      if (remainingText) {
-        textBufferRef.current += remainingText;
-      }
-    } catch {
-      // stream cancelado ou erro
-    } finally {
-      flushStreamingText();
-      setIsStreaming(false);
-    }
-  }, [flushStreamingText, scheduleStreamingFlush]);
+    },
+    [clearPendingFlush, flushStreamingText, scheduleStreamingFlush]
+  );
 
   const clearStream = useCallback(() => {
+    streamIdRef.current += 1;
+
     clearPendingFlush();
+
+    readerRef.current?.cancel?.();
+    readerRef.current = null;
+
     textBufferRef.current = "";
     setPendingUserMessage(null);
     setStreamingText("");
@@ -77,7 +99,13 @@ export function StreamProvider({ children }) {
 
   return (
     <StreamContext.Provider
-      value={{ pendingUserMessage, streamingText, isStreaming, startStream, clearStream }}
+      value={{
+        pendingUserMessage,
+        streamingText,
+        isStreaming,
+        startStream,
+        clearStream,
+      }}
     >
       {children}
     </StreamContext.Provider>
