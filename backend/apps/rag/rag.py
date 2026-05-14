@@ -8,6 +8,7 @@ from llama_index.llms.openai import OpenAI
 from llama_index.core import Settings
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.llms import ChatMessage
+from llama_index.core.vector_stores import MetadataFilters, ExactMatchFilter
 import os
 from dotenv import load_dotenv
 from sqlalchemy import make_url
@@ -47,12 +48,13 @@ class Rag():
     # Define o LLM globalmente no LlamaIndex
     Settings.llm = llm
   
-  def leitura_documento(self,caminho, tipo, data):
+  def leitura_documento(self,caminho, tipo, data,baseid):
     def metadata_arquivo(file_path):        
         return {
             "caminho": str(file_path),
             "tipo": tipo,
             "data": str(data),
+            "base": int(baseid)
         }
     
     documents = SimpleDirectoryReader(
@@ -105,9 +107,9 @@ class Rag():
       storage_context=storage_context
     )
 
-  def indexar_documento(self, caminho,tipo, data ):
+  def indexar_documento(self, caminho,tipo, data, baseid ):
     #Lê um único arquivo, gera os chunks e insere no vector store.
-    self.leitura_documento(caminho,tipo, data)
+    self.leitura_documento(caminho,tipo, data, baseid)
 
     hybrid_vector_store = self._criar_vector_store()
     storage_context = StorageContext.from_defaults(vector_store=hybrid_vector_store)
@@ -130,15 +132,30 @@ class Rag():
       storage_context=storage_context
     )
 
-  def busca_hibrida(self):
+  def busca_hibrida(self, base_id=None):
+    filters = None
+
+    # aplica filtro se vier base_id
+    if base_id is not None:
+        filters = MetadataFilters(
+            filters=[
+                ExactMatchFilter(
+                    key="base",
+                    value=int(base_id)
+                )
+            ]
+        )
+    
     vector_retriever = self.hybrid_index.as_retriever(
       vector_store_query_mode="default",
       similarity_top_k=5,
+      filters=filters
     )
     
     text_retriever = self.hybrid_index.as_retriever(
         vector_store_query_mode="sparse",
-        similarity_top_k=5,  
+        similarity_top_k=5,
+        filters=filters  
     )
     
     retriever = QueryFusionRetriever(
@@ -153,7 +170,7 @@ class Rag():
     
     return retriever, response_synthesizer
     
-  def criar_chat_engine(self, chat_id):
+  def criar_chat_engine(self, chat_id, baseid):
     #Cria um chat engine com memória baseada no model Mensagem do Django
     from llama_index.core.chat_engine import CondensePlusContextChatEngine
     
@@ -176,7 +193,7 @@ class Rag():
     )
     
     # Usar a função busca_hibrida para obter retriever e response_synthesizer
-    retriever, response_synthesizer = self.busca_hibrida()
+    retriever, response_synthesizer = self.busca_hibrida(baseid)
     
     # Chat Engine com contexto e memória
     chat_engine = CondensePlusContextChatEngine.from_defaults(

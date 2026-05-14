@@ -1,4 +1,5 @@
 from apps.chat.models import Mensagem, Chat
+from apps.base_conhecimento.models import Base_Conhecimento
 from .models import ChunkDocumento, MensagemChunk
 from apps.rag.rag import Rag
 
@@ -118,7 +119,11 @@ class RagResposta:
         yield ""  
 
         rag_instance = inicializar_rag()
-        chat_engine = rag_instance.criar_chat_engine(self.chat_id)
+        try:
+            base = Base_Conhecimento.objects.filter(status='ATIVO').first()
+        except:
+            base = None
+        chat_engine = rag_instance.criar_chat_engine(self.chat_id, base.id)
 
         response = chat_engine.stream_chat(self.pergunta_usuario)
 
@@ -243,7 +248,7 @@ def responder_mensagem(userid, chat_id=None, pergunta=""):
     return chat_id, stream
 
 
-def indexar_documento_no_rag(caminho: str, tipo: str, data):
+def indexar_documento_no_rag(caminho: str, tipo: str, data, baseid):
     rag_instance = Rag()
     rag_instance.carregar_llm()
-    rag_instance.indexar_documento(caminho, tipo, data)
+    rag_instance.indexar_documento(caminho, tipo, data, baseid)
