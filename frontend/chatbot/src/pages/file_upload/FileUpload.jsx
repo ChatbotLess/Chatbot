@@ -5,9 +5,9 @@ export function FileUpload() {
     <div className="h-screen overflow-y-auto bg-gray-950 px-6 py-8 md:px-10">
       <div className="mx-auto w-full max-w-5xl">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Inserir documentos</h1>
+          <h1 className="text-3xl font-bold text-white">Enviar documento</h1>
           <p className="mt-2 text-sm text-gray-400">
-            Faça o envio de arquivos PDF e acompanhe a lista de documentos adicionados.
+            Selecione a base, o tipo e faça o envio de um arquivo PDF.
           </p>
         </header>
 
