@@ -19,6 +19,7 @@ def processar_documento_rag(documento_id):
             caminho=doc.caminho.path,
             tipo=doc.tipo,
             data=doc.data_atualizacao,
+            baseid=doc.base.id
         )
 
         doc.status = Documento.StatusDocumento.CONCLUIDO
