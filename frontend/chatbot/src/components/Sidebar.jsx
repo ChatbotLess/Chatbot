@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { FaChartBar, FaEllipsisV, FaFileUpload, FaPlus, FaUser } from "react-icons/fa";
+import { FaChartBar, FaDatabase, FaEllipsisV, FaFileUpload, FaPlus, FaUser } from "react-icons/fa";
 import { MdLogout, MdOutlineMessage } from "react-icons/md";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthProvider/AuthProvider";
@@ -55,6 +55,14 @@ export function Sidebar() {
           >
             <FaChartBar className="shrink-0 text-gray-400" />
             Dashboard
+          </button>
+
+          <button
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white"
+            onClick={() => navigate("/knowledge")}
+          >
+            <FaDatabase className="shrink-0 text-gray-400" />
+            Bases de Conhecimento
           </button>
         </nav>
       </div>

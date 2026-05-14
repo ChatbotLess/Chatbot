@@ -31,6 +31,20 @@ def ativar_base(request, baseID: int):
       return 400, {"erro": e.messages}
 
     return base
+  
+@router.post("/desativarbase",response={200: BaseConhecimentoOut, 400: ErroSchema}, tags=["Base Conhecimento"])
+def desativar_base(request, baseID: int):
+    base = get_object_or_404(Base_Conhecimento, id=baseID)
+    try:
+        base.status = Base_Conhecimento.StatusBaseDocumento.Desativado
+        base.full_clean()
+        base.save()
+
+    except ValidationError as e:
+        return 400, {"erro": e.messages}
+
+    return base
+
 
 @router.post("/criarbase",response={200: BaseConhecimentoOut, 400: ErroSchema}, tags=["Base Conhecimento"])
 def criar_BaseConhecimento(request,titulo : str, versao : str, descricao : str):
@@ -56,7 +70,7 @@ def criar_BaseConhecimento(request,titulo : str, versao : str, descricao : str):
   return base
 
 @router.post("/upload", tags=["Documento"])
-def upload(request, base_id : int, user_id: str, file: File[UploadedFile], tipo: str):
+def upload(request, base_id: int, user_id: str, file: File[UploadedFile], tipo: str):
   user = get_object_or_404(User, id=user_id)
   base = get_object_or_404(Base_Conhecimento, id=base_id)
   tipo = tipo.upper()
