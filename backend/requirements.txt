@@ -60,6 +60,7 @@ llama-index-storage-chat-store-postgres==0.3.2
 llama-index-vector-stores-postgres==0.7.3
 llama-index-workflows==2.15.1
 llama-parse==0.6.54
+langsmith==0.8.5
 markdown-it-py==4.0.0
 markupsafe==3.0.3
 marshmallow==3.26.2
