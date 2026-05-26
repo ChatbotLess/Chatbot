@@ -7,7 +7,7 @@ const uploadDocument = async ({ file, baseId, tipo }) => {
 
   const params = new URLSearchParams({
     base_id: baseId,
-    user_id: "0e5a72b0-77c6-4354-98fd-302b902da030",
+    user_id: "06101211-9724-48a7-89e7-71e4e9444617",
     tipo,
   });
 

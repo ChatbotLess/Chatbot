@@ -23,7 +23,7 @@ export function Promptbar() {
 
     mutate(
       {
-        userid: "2d74241b-300e-409e-8041-f96d769a6787",
+        userid: "06101211-9724-48a7-89e7-71e4e9444617",
         message,
         chatID: conversationId ?? null,
       },
@@ -61,18 +61,19 @@ export function Promptbar() {
 
   return (
     <form className="w-full" onSubmit={handleSubmit(handlePerguntar)}>
-      <div className="flex items-center bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 gap-2">
+      <div className="flex items-center gap-2 rounded-xl border border-gray-700 bg-gray-800 px-3 py-2 shadow-lg shadow-black/10 transition focus-within:border-blue-500/60 focus-within:ring-2 focus-within:ring-blue-500/20">
         <input
           type="text"
           placeholder="Olá, como posso te ajudar?"
-          className="flex bg-transparent outline-none text-gray-200 placeholder-gray-400 w-[100%] disabled:opacity-50"
+          className="min-h-11 min-w-0 flex-1 bg-transparent text-sm text-gray-200 outline-none placeholder:text-gray-400 disabled:opacity-50 xs:text-base"
           disabled={busy}
           {...register("message", { required: true })}
         />
         <button
           type="submit"
           disabled={busy}
-          className="p-2 rounded-lg hover:bg-gray-700 transition disabled:opacity-40"
+          className="rounded-lg p-2 text-gray-300 transition hover:bg-gray-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 disabled:cursor-not-allowed disabled:opacity-40"
+          aria-label={busy ? "Aguarde a resposta" : "Enviar mensagem"}
         >
           <TbSend size={20} className="text-gray-300" />
         </button>
