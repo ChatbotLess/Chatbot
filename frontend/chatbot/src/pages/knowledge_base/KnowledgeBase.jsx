@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { Fragment, useState, useMemo } from "react";
 import {
   FaSearch,
   FaDatabase,
@@ -31,13 +31,15 @@ function formatDate(raw) {
 
 // ── Stat Card ────────────────────────────────────────────────────────────────
 
-function StatCard({ icon: Icon, label, value, accent }) {
+function StatCard({ icon, label, value, accent }) {
+  const IconComponent = icon;
+
   return (
     <div className="flex items-center gap-4 rounded-xl border border-gray-800 bg-gray-900/80 p-4 shadow-sm transition-all duration-300 hover:border-gray-700 hover:shadow-md">
       <div
         className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${accent}`}
       >
-        <Icon className="text-lg" />
+        <IconComponent className="text-lg" />
       </div>
       <div className="min-w-0">
         <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
@@ -55,12 +57,12 @@ function StatCard({ icon: Icon, label, value, accent }) {
 
 function DocumentRow({ doc }) {
   return (
-    <div className="group flex items-center gap-4 rounded-lg border border-transparent px-4 py-3 transition-all duration-200 hover:border-gray-800 hover:bg-gray-800/50">
+    <div className="group flex flex-wrap items-center gap-3 rounded-lg border border-transparent px-3 py-3 transition-all duration-200 hover:border-gray-800 hover:bg-gray-800/50 xs:px-4">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-400">
         <FaFileAlt className="text-sm" />
       </div>
 
-      <div className="min-w-0 flex-1">
+      <div className="min-w-[10rem] flex-1">
         <p className="truncate text-sm font-medium text-gray-200 group-hover:text-white">
           {doc.nome_documento || "Documento sem título"}
         </p>
@@ -89,14 +91,14 @@ function DocumentRow({ doc }) {
 
 function EmptyDetail() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 text-gray-500">
+    <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-center text-gray-500">
       <div className="relative">
         <FaFolder className="text-6xl text-gray-700 opacity-60" />
         <div className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-gray-800 text-xs text-gray-500">
           ?
         </div>
       </div>
-      <div className="text-center">
+      <div>
         <p className="text-lg font-medium text-gray-400">
           Selecione uma base de conhecimento
         </p>
@@ -119,7 +121,7 @@ function BaseListItem({ base, isSelected, onSelect, onToggle, isToggling }) {
       tabIndex={0}
       onClick={() => onSelect(base)}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(base); }}
-      className={`group flex w-full cursor-pointer gap-3 rounded-xl border px-4 py-3.5 text-left transition-all duration-200 ${
+      className={`group flex w-full cursor-pointer gap-3 rounded-xl border px-3 py-3.5 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 xs:px-4 ${
         isSelected
           ? "border-blue-500/40 bg-blue-500/10 shadow-lg shadow-blue-500/5"
           : "border-transparent hover:border-gray-800 hover:bg-gray-800/50"
@@ -150,7 +152,7 @@ function BaseListItem({ base, isSelected, onSelect, onToggle, isToggling }) {
           {base.descricao || "Sem descrição"}
         </p>
 
-        <div className="mt-2 flex items-center gap-3 text-[11px] text-gray-600">
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-600">
           <span className="flex items-center gap-1">
             <FaFileAlt className="text-[10px]" />
             {base.versao || "—"}
@@ -203,12 +205,12 @@ function DetailPanel({ base }) {
   return (
     <div className="flex h-full flex-col overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-gray-700">
       {/* Header */}
-      <div className="shrink-0 border-b border-gray-800 p-6">
-        <div className="flex items-start justify-between gap-4">
+      <div className="shrink-0 border-b border-gray-800 p-4 md:p-6">
+        <div className="flex flex-col gap-4 xs:flex-row xs:items-start xs:justify-between">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-3">
               <FaFolderOpen className="shrink-0 text-2xl text-sky-400" />
-              <h2 className="truncate text-xl font-bold text-white">
+              <h2 className="truncate text-lg font-bold text-white xs:text-xl">
                 {base.titulo || "Base sem nome"}
               </h2>
             </div>
@@ -230,7 +232,7 @@ function DetailPanel({ base }) {
       </div>
 
       {/* Stat Cards */}
-      <div className="shrink-0 grid grid-cols-1 gap-3 p-6 sm:grid-cols-3">
+      <div className="shrink-0 grid grid-cols-1 gap-3 p-4 sm:grid-cols-3 md:p-6">
         <StatCard
           icon={FaLayerGroup}
           label="Versão"
@@ -252,7 +254,7 @@ function DetailPanel({ base }) {
       </div>
 
       {/* Documents */}
-      <div className="min-h-0 flex-1 px-6 pb-6">
+      <div className="min-h-0 flex-1 px-4 pb-4 md:px-6 md:pb-6">
         <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-gray-400">
           <FaFileAlt className="text-xs" />
           Documentos Recentes
@@ -342,12 +344,12 @@ export function KnowledgeBase() {
     activateMutation.isPending || deactivateMutation.isPending;
 
   return (
-    <div className="flex h-screen bg-gray-950">
+    <div className="flex h-full min-h-0 bg-gray-950">
       {/* ── Left Column: List ──────────────────────────────── */}
-      <div className="flex w-full flex-col border-r border-gray-800 md:w-[40%] md:min-w-[340px] md:max-w-[500px]">
+      <div className="flex w-full min-w-0 flex-col border-r border-gray-800 md:w-[40%] md:min-w-[340px] md:max-w-[500px]">
         {/* Header */}
-        <div className="shrink-0 border-b border-gray-800 p-5">
-          <h1 className="text-xl font-bold text-white">
+        <div className="shrink-0 border-b border-gray-800 p-4 xs:p-5">
+          <h1 className="text-lg font-bold text-white xs:text-xl">
             Bases de Conhecimento
           </h1>
           <p className="mt-1 text-xs text-gray-500">
@@ -362,7 +364,7 @@ export function KnowledgeBase() {
               placeholder="Buscar por nome ou descrição..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-4 text-sm text-gray-200 placeholder-gray-600 outline-none transition-colors focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20"
+            className="w-full rounded-lg border border-gray-800 bg-gray-900 py-2.5 pl-9 pr-4 text-sm text-gray-200 placeholder-gray-600 outline-none transition-colors hover:border-gray-700 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20"
             />
           </div>
         </div>
@@ -399,14 +401,20 @@ export function KnowledgeBase() {
 
           <div className="flex flex-col gap-1">
             {filteredBases.map((base) => (
-              <BaseListItem
-                key={base.id}
-                base={base}
-                isSelected={selectedBaseId === base.id}
-                onSelect={(b) => setSelectedBaseId(b.id)}
-                onToggle={handleToggle}
-                isToggling={isToggling}
-              />
+              <Fragment key={base.id}>
+                <BaseListItem
+                  base={base}
+                  isSelected={selectedBaseId === base.id}
+                  onSelect={(b) => setSelectedBaseId(b.id)}
+                  onToggle={handleToggle}
+                  isToggling={isToggling}
+                />
+                {selectedBaseId === base.id && (
+                  <div className="my-2 overflow-hidden rounded-xl border border-gray-800 bg-gray-950/40 md:hidden">
+                    <DetailPanel base={base} />
+                  </div>
+                )}
+              </Fragment>
             ))}
           </div>
         </div>

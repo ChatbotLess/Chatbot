@@ -6,7 +6,7 @@ import api from "../../services/api";
 
 
 export function SignupForm() {
-    const { register, handleSubmit, watch, formState: { errors } } = useForm();
+    const { register, handleSubmit, watch } = useForm();
     const { createUser } = useContext(AuthContext);
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +35,7 @@ export function SignupForm() {
     }
 
     return (
-        <div className="bg-gray-900 rounded-lg p-10 shadow-xl w-full max-w-md">
+        <div className="w-full max-w-md rounded-lg bg-gray-900 p-5 shadow-xl xs:p-6 md:p-10">
 
             <form className="space-y-5" onSubmit={handleSubmit(handleSignup)}>
                 <header className="mb-6">

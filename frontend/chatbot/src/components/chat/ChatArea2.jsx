@@ -19,7 +19,7 @@ const markdownComponents = {
       {...props}
       target="_blank"
       rel="noreferrer"
-      className="text-blue-300 underline decoration-blue-300/50 underline-offset-2 hover:text-blue-200"
+          className="text-blue-300 underline decoration-blue-300/50 underline-offset-2 transition hover:text-blue-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
     />
   ),
 
@@ -220,7 +220,7 @@ const FeedbackActions = memo(function FeedbackActions({
           type="button"
           onClick={handleLike}
           disabled={isPending}
-          className={`rounded-md p-1.5 transition disabled:opacity-50 ${
+          className={`rounded-md p-1.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 disabled:cursor-not-allowed disabled:opacity-50 ${
             selectedFeedback === "LIKE"
               ? "bg-blue-500/20 text-blue-200"
               : "text-gray-500 hover:bg-gray-800 hover:text-gray-200"
@@ -235,7 +235,7 @@ const FeedbackActions = memo(function FeedbackActions({
           type="button"
           onClick={handleDislikeClick}
           disabled={isPending}
-          className={`rounded-md p-1.5 transition disabled:opacity-50 ${
+          className={`rounded-md p-1.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 disabled:cursor-not-allowed disabled:opacity-50 ${
             selectedFeedback === "DISLIKE"
               ? "bg-red-500/20 text-red-200"
               : "text-gray-500 hover:bg-gray-800 hover:text-gray-200"
@@ -277,14 +277,14 @@ const MessageBubble = memo(function MessageBubble({
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-      <div className={`max-w-[85%] ${isUser ? "flex justify-end" : ""}`}>
+      <div className={`max-w-[92%] sm:max-w-[85%] ${isUser ? "flex justify-end" : ""}`}>
         <div
           className={
             isUser ? "flex flex-col items-end" : "flex flex-col items-start"
           }
         >
           <article
-            className={`break-words rounded-lg px-4 py-3 text-sm leading-6 shadow-sm ${
+            className={`break-words rounded-lg px-3 py-2.5 text-sm leading-6 shadow-sm xs:px-4 xs:py-3 ${
               isUser
                 ? "whitespace-pre-wrap bg-blue-600 text-white"
                 : "border border-gray-800 bg-gray-900 text-gray-100"
@@ -404,8 +404,8 @@ export function ChatArea2({ conversationId }) {
   ]);
 
   return (
-    <div className="flex h-full w-full max-w-[760px] flex-col px-4 py-6">
-      <div className="min-h-0 flex-1 overflow-y-auto pb-5 pr-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex h-full min-h-0 w-full max-w-[760px] flex-col px-3 py-4 sm:px-4 sm:py-6">
+      <div className="min-h-0 flex-1 overflow-y-auto pb-4 pr-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {isLoading && (
           <div className="rounded-md border border-gray-800 bg-gray-900/70 px-4 py-3 text-sm text-gray-400">
             Carregando mensagens...
@@ -419,8 +419,10 @@ export function ChatArea2({ conversationId }) {
         )}
 
         {!isLoading && !isError && messages.length === 0 && !showStreaming && (
-          <div className="flex h-full items-center justify-center text-center text-sm text-gray-500">
-            Nenhuma mensagem encontrada neste chat.
+          <div className="flex h-full items-center justify-center px-4 text-center">
+            <div className="rounded-lg border border-dashed border-gray-800 px-5 py-6 text-sm text-gray-500">
+              Nenhuma mensagem encontrada neste chat.
+            </div>
           </div>
         )}
 
@@ -445,14 +447,14 @@ export function ChatArea2({ conversationId }) {
           >
             {pendingUserMessage && (
               <div className="flex justify-end">
-                <article className="max-w-[85%] break-words rounded-lg bg-blue-600 px-4 py-3 text-sm leading-6 text-white shadow-sm whitespace-pre-wrap">
+                <article className="max-w-[92%] break-words rounded-lg bg-blue-600 px-3 py-2.5 text-sm leading-6 text-white shadow-sm whitespace-pre-wrap xs:px-4 xs:py-3 sm:max-w-[85%]">
                   {pendingUserMessage}
                 </article>
               </div>
             )}
 
             <div className="flex justify-start">
-              <article className="max-w-[85%] break-words rounded-lg border border-gray-800 bg-gray-900 px-4 py-3 text-sm leading-6 text-gray-100 shadow-sm">
+              <article className="max-w-[92%] break-words rounded-lg border border-gray-800 bg-gray-900 px-3 py-2.5 text-sm leading-6 text-gray-100 shadow-sm xs:px-4 xs:py-3 sm:max-w-[85%]">
                 {streamingText ? (
                   <MarkdownMessage content={streamingText} />
                 ) : (

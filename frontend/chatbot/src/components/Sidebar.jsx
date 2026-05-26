@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthProvider/AuthProvider";
 import { useChatData } from "../hooks/useChatData";
 
-export function Sidebar() {
+export function Sidebar({ onNavigate }) {
   const { logOut, user } = useContext(AuthContext);
   const { data, isError, isLoading } = useChatData(!!user);
   const navigate = useNavigate();
@@ -15,18 +15,32 @@ export function Sidebar() {
   const handleLogout = async () => {
     try {
       await logOut();
+      onNavigate?.();
       navigate("/login");
     } catch (error) {
       console.error(error);
     }
   };
 
+  const handleNavigate = (path) => {
+    navigate(path);
+    onNavigate?.();
+  };
+
   return (
-    <aside className="flex h-screen w-[min(18rem,85vw)] shrink-0 flex-col overflow-hidden rounded-r-lg border-r border-gray-800 bg-gray-900 px-3 py-4 text-gray-200 shadow-xl shadow-black/20">
+    <aside className="flex h-full w-[min(18rem,86vw)] shrink-0 flex-col overflow-hidden rounded-r-lg border-r border-gray-800 bg-gray-900 px-3 py-4 text-gray-200 shadow-xl shadow-black/20 md:h-[100dvh]">
       <div className="shrink-0">
         <header
-          className="mb-6 flex cursor-pointer items-center gap-2 px-1 transition hover:opacity-80"
-          onClick={() => navigate("/")}
+          className="mb-6 flex cursor-pointer items-center gap-2 rounded-md px-1 py-1 transition hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+          onClick={() => handleNavigate("/")}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              handleNavigate("/");
+            }
+          }}
+          role="button"
+          tabIndex={0}
         >
           <MdOutlineMessage className="text-2xl text-white" />
           <h1 className="text-2xl font-bold text-white">Chatbot</h1>
@@ -34,32 +48,32 @@ export function Sidebar() {
 
         <nav className="flex flex-col gap-1">
           <button
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white"
-            onClick={() => navigate("/")}
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+            onClick={() => handleNavigate("/")}
           >
             <FaPlus className="shrink-0 text-gray-400" />
             Nova Conversa
           </button>
 
           <button
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white"
-            onClick={() => navigate("/upload")}
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+            onClick={() => handleNavigate("/upload")}
           >
             <FaFileUpload className="shrink-0 text-gray-400" />
             Inserir Documentos
           </button>
 
           <button
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white"
-            onClick={() => navigate("/dashboard")}
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+            onClick={() => handleNavigate("/dashboard")}
           >
             <FaChartBar className="shrink-0 text-gray-400" />
             Dashboard
           </button>
 
           <button
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white"
-            onClick={() => navigate("/knowledge")}
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+            onClick={() => handleNavigate("/knowledge")}
           >
             <FaDatabase className="shrink-0 text-gray-400" />
             Bases de Conhecimento
@@ -107,7 +121,8 @@ export function Sidebar() {
                     ? "bg-blue-600/20 text-white ring-1 ring-blue-500/40"
                     : "text-gray-300 hover:bg-gray-800 hover:text-white"
                 }`}
-                onClick={() => navigate(`/chat/${chat.id}`)}
+                onClick={() => handleNavigate(`/chat/${chat.id}`)}
+                aria-current={isActive ? "page" : undefined}
               >
                 <MdOutlineMessage
                   className={`shrink-0 ${
@@ -137,7 +152,7 @@ export function Sidebar() {
 
         <button
           onClick={handleLogout}
-          className="cursor-pointer rounded-md p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white"
+          className="cursor-pointer rounded-md p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
           title="Sair"
           type="button"
         >
