@@ -29,6 +29,14 @@ services:
     networks:
       - web
 
+  classificador:
+    image: integracar/classificador:latest
+    container_name: chatbot_classificador
+    ports:
+      - "8001:8000"
+    networks:
+      - web
+
   web:
     build: .
     container_name: chatbot_web
@@ -56,6 +64,7 @@ services:
       DB_PORT: 5432
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/1
+      CLASSIFICADOR_URL: http://classificador:8000/classificar
     volumes:
       - .:/app
     depends_on:
@@ -63,6 +72,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      classificador:
+        condition: service_started
     networks:
       - web
 
