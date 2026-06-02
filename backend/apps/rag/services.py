@@ -5,6 +5,8 @@ from apps.rag.rag import Rag
 from apps.rag.langsmith_tracing import traceable
 
 from pathlib import Path
+import os
+import requests
 import time
 
 if not hasattr(time, "clock"):
@@ -22,6 +24,9 @@ warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 
 AIML_PATH = Path(__file__).resolve().parent / "perguntas_frequentes.aiml"
+CLASSIFICADOR_URL = os.getenv("CLASSIFICADOR_URL", "http://127.0.0.1:8001/classificar")
+CLASSIFICADOR_TIMEOUT = float(os.getenv("CLASSIFICADOR_TIMEOUT", "5"))
+CLASSIFICADOR_CONFIANCA_MINIMA = float(os.getenv("CLASSIFICADOR_CONFIANCA_MINIMA", "0.70"))
 
 MENSAGEM_SEM_DOCS = (
     "Ainda não há documentos indexados na base de conhecimento. "
@@ -45,6 +50,34 @@ def _mensagem_output(mensagem):
 
 def _rag_output(_rag_instance):
     return {"status": "rag_inicializado"}
+
+
+@traceable(name="Classificar intenção", run_type="tool")
+def classificar_intencao(pergunta_usuario):
+    try:
+        response = requests.post(
+            CLASSIFICADOR_URL,
+            headers={
+                "accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            json={"texto": pergunta_usuario},
+            timeout=CLASSIFICADOR_TIMEOUT,
+        )
+        response.raise_for_status()
+        payload = response.json()
+    except (requests.RequestException, ValueError, TypeError):
+        return None
+
+    classificacao = payload.get("classificacao")
+    
+    if not classificacao:
+        return None
+
+    return {
+        "classificacao": str(classificacao).strip().upper(),
+        "confianca": payload.get("confianca"),
+    }
 
 
 @traceable(name="Salvar mensagem", run_type="tool", process_outputs=_mensagem_output)
@@ -181,13 +214,18 @@ def stream_resposta_rag(pergunta_usuario, chat_id):
     yield ""
 
     rag_instance = inicializar_rag()
+    intencao = classificar_intencao(pergunta_usuario)
+    tipo_documento = None
+
+    if intencao and float(intencao.get("confianca") or 0) > CLASSIFICADOR_CONFIANCA_MINIMA:
+        tipo_documento = intencao["classificacao"]
     try:
         base = Base_Conhecimento.objects.filter(status='ATIVO').first()
     except:
         base = None
 
     base_id = base.id if base else None
-    chat_engine = rag_instance.criar_chat_engine(chat_id, base_id)
+    chat_engine = rag_instance.criar_chat_engine(chat_id, base_id, tipo_documento)
     response = chat_engine.stream_chat(pergunta_usuario)
 
     texto_completo = ""
@@ -204,6 +242,7 @@ def stream_resposta_rag(pergunta_usuario, chat_id):
                 role="assistant",
                 conteudo=texto_completo,
                 pergunta_original=pergunta_usuario,
+                intencao=tipo_documento,
             )
 
             salvar_metadados(resposta, response.source_nodes)

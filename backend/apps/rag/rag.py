@@ -132,19 +132,27 @@ class Rag():
       storage_context=storage_context
     )
 
-  def busca_hibrida(self, base_id=None):
-    filters = None
+  def busca_hibrida(self, base_id=None, tipo=None):
+    filtros = []
 
     # aplica filtro se vier base_id
     if base_id is not None:
-        filters = MetadataFilters(
-            filters=[
-                ExactMatchFilter(
-                    key="base",
-                    value=int(base_id)
-                )
-            ]
+        filtros.append(
+            ExactMatchFilter(
+                key="base",
+                value=int(base_id)
+            )
         )
+
+    if tipo:
+        filtros.append(
+            ExactMatchFilter(
+                key="tipo",
+                value=str(tipo).strip().upper()
+            )
+        )
+
+    filters = MetadataFilters(filters=filtros) if filtros else None
     
     vector_retriever = self.hybrid_index.as_retriever(
       vector_store_query_mode="default",
@@ -170,7 +178,7 @@ class Rag():
     
     return retriever, response_synthesizer
     
-  def criar_chat_engine(self, chat_id, baseid):
+  def criar_chat_engine(self, chat_id, baseid, tipo=None):
     #Cria um chat engine com memória baseada no model Mensagem do Django
     from llama_index.core.chat_engine import CondensePlusContextChatEngine
     
@@ -193,7 +201,7 @@ class Rag():
     )
     
     # Usar a função busca_hibrida para obter retriever e response_synthesizer
-    retriever, response_synthesizer = self.busca_hibrida(baseid)
+    retriever, response_synthesizer = self.busca_hibrida(baseid, tipo)
     
     # Chat Engine com contexto e memória
     chat_engine = CondensePlusContextChatEngine.from_defaults(
