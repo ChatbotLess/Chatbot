@@ -7,16 +7,18 @@ import {
   confirmPasswordReset,
   signOut,
 } from "firebase/auth";
-import { createContext, useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { createContext, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { auth } from "../../firebase";
-import api from "../../services/api";
 
 export const AuthContext = createContext(null);
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const lastUserUidRef = useRef(null);
 
   const createUser = (email, password) => {
     setLoading(true);
@@ -50,6 +52,14 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      const currentUid = currentUser?.uid ?? null;
+
+      if (lastUserUidRef.current !== currentUid) {
+        queryClient.cancelQueries();
+        queryClient.clear();
+      }
+
+      lastUserUidRef.current = currentUid;
       setUser(currentUser);
       setLoading(false);
     });
@@ -57,7 +67,7 @@ const AuthProvider = ({ children }) => {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [queryClient]);
 
   const authValue = {
     createUser,

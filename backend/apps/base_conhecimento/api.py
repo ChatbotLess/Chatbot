@@ -4,7 +4,6 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from .schemas import DocumentoSchemaOut, BaseConhecimentoIn, BaseConhecimentoOut, ErroSchema
 from .models import Documento, Base_Conhecimento
-from apps.user.models import User
 from apps.base_conhecimento.tasks import processar_documento_rag
 
 router = Router()
@@ -70,8 +69,8 @@ def criar_BaseConhecimento(request,titulo : str, versao : str, descricao : str):
   return base
 
 @router.post("/upload", tags=["Documento"])
-def upload(request, base_id: int, user_id: str, file: File[UploadedFile], tipo: str):
-  user = get_object_or_404(User, id=user_id)
+def upload(request, base_id: int, file: File[UploadedFile], tipo: str):
+  user = request.auth
   base = get_object_or_404(Base_Conhecimento, id=base_id)
   tipo = tipo.upper()
   doc = Documento(

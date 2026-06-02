@@ -145,6 +145,15 @@ STATIC_URL = 'static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+FIREBASE_CREDENTIALS_PATH = os.getenv("FIREBASE_CREDENTIALS_PATH")
+if not FIREBASE_CREDENTIALS_PATH:
+    default_firebase_credentials = BASE_DIR / "firebase-service-account.json"
+    if not default_firebase_credentials.exists():
+        firebase_credentials_matches = sorted(BASE_DIR.glob("*firebase-adminsdk*.json"))
+        if firebase_credentials_matches:
+            default_firebase_credentials = firebase_credentials_matches[0]
+    FIREBASE_CREDENTIALS_PATH = str(default_firebase_credentials)
+
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
 CELERY_ACCEPT_CONTENT = ["json"]

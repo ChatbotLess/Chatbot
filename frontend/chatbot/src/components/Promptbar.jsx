@@ -1,10 +1,12 @@
+import { useContext } from "react";
 import { TbSend } from "react-icons/tb";
 import { useParams, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useMessageMutate } from "../hooks/useMessageMutate";
 import { useStream } from "../context/StreamContext/StreamProvider";
 import { useQueryClient } from "@tanstack/react-query";
-import { CHAT_USER_ID } from "../hooks/useChatData";
+import { chatQueryKeys, getChatQueryScope } from "../hooks/useChatData";
+import { AuthContext } from "../context/AuthProvider/AuthProvider";
 
 export function Promptbar() {
   const { register, handleSubmit, reset } = useForm();
@@ -13,17 +15,18 @@ export function Promptbar() {
   const { mutate, isPending } = useMessageMutate();
   const { startStream, clearStream, isStreaming } = useStream();
   const queryClient = useQueryClient();
+  const { user } = useContext(AuthContext);
+  const chatScope = getChatQueryScope(user);
 
   const handlePerguntar = (data) => {
     const message = data.message?.trim();
-    if (!message || isStreaming) return;
+    if (!message || isStreaming || !user?.uid) return;
 
     // Limpa stream anterior
     clearStream();
 
     mutate(
       {
-        userid: "0e5a72b0-77c6-4354-98fd-302b902da030",
         message,
         chatID: conversationId ?? null,
       },
@@ -40,7 +43,7 @@ export function Promptbar() {
           // Stream acabou - aguarda o banco estar pronto ANTES de limpar os balões
           // refetchQueries retorna uma Promise que resolve quando o dado chegou
           await queryClient.refetchQueries({
-            queryKey: ["chat-messages", CHAT_USER_ID, chatId ?? conversationId],
+            queryKey: chatQueryKeys.messages(chatScope, chatId ?? conversationId),
           });
 
           // Agora que o banco está no cache, remove os balões de streaming
@@ -48,7 +51,7 @@ export function Promptbar() {
 
           // Atualiza a lista de chats na sidebar (não precisa aguardar)
           queryClient.invalidateQueries({
-            queryKey: ["chat-data", CHAT_USER_ID],
+            queryKey: chatQueryKeys.chats(chatScope),
           });
         },
       }

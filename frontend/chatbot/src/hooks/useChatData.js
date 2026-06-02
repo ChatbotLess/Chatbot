@@ -1,22 +1,27 @@
+import { useContext } from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../services/api";
+import { AuthContext } from "../context/AuthProvider/AuthProvider";
 
-export const CHAT_USER_ID = "0e5a72b0-77c6-4354-98fd-302b902da030";
+export function getChatQueryScope(user) {
+  return user?.uid ? `firebase:${user.uid}` : "no-user";
+}
 
-const fetchChats = async (userId) => {
-  const response = await api.get("/api/chat/listarchats", {
-    params: {
-      user_id: userId,
-    },
-  });
+export const chatQueryKeys = {
+  chats: (scope) => ["chat-data", scope],
+  feedbacks: (scope, chatId) => ["chat-feedback", scope, chatId],
+  messages: (scope, chatId) => ["chat-messages", scope, chatId],
+};
+
+const fetchChats = async () => {
+  const response = await api.get("/api/chat/listarchats");
 
   return response.data ?? [];
 };
 
-const fetchChatMessages = async ({ userId, chatId }) => {
+const fetchChatMessages = async (chatId) => {
   const response = await api.get("/api/chat/listarmensagem", {
     params: {
-      userid: userId,
       chatID: chatId,
     },
   });
@@ -26,10 +31,9 @@ const fetchChatMessages = async ({ userId, chatId }) => {
   ));
 };
 
-const fetchChatFeedbacks = async ({ userId, chatId }) => {
+const fetchChatFeedbacks = async (chatId) => {
   const response = await api.get("/api/chat/listarfeedback", {
     params: {
-      userid: userId,
       chatID: chatId,
     },
   });
@@ -37,34 +41,43 @@ const fetchChatFeedbacks = async ({ userId, chatId }) => {
   return response.data ?? [];
 };
 
-export function useChatData(enabled = true, userId = CHAT_USER_ID){
+export function useChatData(enabled = true){
+  const { user } = useContext(AuthContext);
+  const chatScope = getChatQueryScope(user);
+
   const query = useQuery({
-    queryFn: () => fetchChats(userId),
-    queryKey: ['chat-data', userId],
+    queryFn: fetchChats,
+    queryKey: chatQueryKeys.chats(chatScope),
     refetchOnWindowFocus: false,
-    enabled: enabled && Boolean(userId),
+    enabled: enabled && Boolean(user?.uid),
   })
 
   return query;
 }
 
-export function useChatFeedbacks(chatId, enabled = true, userId = CHAT_USER_ID) {
+export function useChatFeedbacks(chatId, enabled = true) {
+  const { user } = useContext(AuthContext);
+  const chatScope = getChatQueryScope(user);
+
   const query = useQuery({
-    queryFn: () => fetchChatFeedbacks({ userId, chatId }),
-    queryKey: ['chat-feedback', userId, chatId],
+    queryFn: () => fetchChatFeedbacks(chatId),
+    queryKey: chatQueryKeys.feedbacks(chatScope, chatId),
     refetchOnWindowFocus: false,
-    enabled: enabled && Boolean(userId) && Boolean(chatId),
+    enabled: enabled && Boolean(user?.uid) && Boolean(chatId),
   });
 
   return query;
 }
 
-export function useChatMessages(chatId, enabled = true, userId = CHAT_USER_ID) {
+export function useChatMessages(chatId, enabled = true) {
+  const { user } = useContext(AuthContext);
+  const chatScope = getChatQueryScope(user);
+
   const query = useQuery({
-    queryFn: () => fetchChatMessages({ userId, chatId }),
-    queryKey: ['chat-messages', userId, chatId],
+    queryFn: () => fetchChatMessages(chatId),
+    queryKey: chatQueryKeys.messages(chatScope, chatId),
     refetchOnWindowFocus: false,
-    enabled: enabled && Boolean(userId) && Boolean(chatId),
+    enabled: enabled && Boolean(user?.uid) && Boolean(chatId),
   });
 
   return query;

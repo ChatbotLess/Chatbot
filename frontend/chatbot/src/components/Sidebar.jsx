@@ -2,18 +2,22 @@ import { useContext } from "react";
 import { FaChartBar, FaDatabase, FaEllipsisV, FaFileUpload, FaPlus, FaUser } from "react-icons/fa";
 import { MdLogout, MdOutlineMessage } from "react-icons/md";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "../context/AuthProvider/AuthProvider";
 import { useChatData } from "../hooks/useChatData";
 
 export function Sidebar({ onNavigate }) {
   const { logOut, user } = useContext(AuthContext);
   const { data, isError, isLoading } = useChatData(!!user);
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
   const userName = user?.displayName || user?.email?.split("@")[0] || "Usuario";
 
   const handleLogout = async () => {
     try {
+      await queryClient.cancelQueries();
+      queryClient.clear();
       await logOut();
       onNavigate?.();
       navigate("/login");
