@@ -19,7 +19,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     
-    firebase_uid = models.CharField()
+    firebase_uid = models.CharField(max_length=128, unique=True)
     
     email = models.EmailField(
         'email',

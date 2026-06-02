@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
+import { updateProfile } from "firebase/auth";
 import { AuthContext } from "../../context/AuthProvider/AuthProvider";
 import { useForm } from 'react-hook-form';
-import api from "../../services/api";
 
 
 export function SignupForm() {
@@ -16,15 +16,8 @@ export function SignupForm() {
 
         try {
             const credential = await createUser(data.email, data.senha);
-
-            const payload = {
-                firebase_uid: credential.user.uid,
-                email: credential.user.email,
-                password: data.senha,
-                name: data.nome
-            };
-
-            await api.post("/api/users/User/", payload);
+            await updateProfile(credential.user, { displayName: data.nome });
+            await credential.user.getIdToken(true);
             
             navigate("/login");
         } catch (error) {

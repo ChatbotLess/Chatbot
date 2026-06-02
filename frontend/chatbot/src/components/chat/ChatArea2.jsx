@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { TbThumbDown, TbThumbUp } from "react-icons/tb";
 import ReactMarkdown from "react-markdown";
@@ -6,12 +6,14 @@ import remarkGfm from "remark-gfm";
 import { FeedbackModal } from "../FeedbackModal";
 import { Promptbar } from "../Promptbar";
 import {
-  CHAT_USER_ID,
+  chatQueryKeys,
+  getChatQueryScope,
   useChatFeedbacks,
   useChatMessages,
 } from "../../hooks/useChatData";
 import { useFeedbackMutate } from "../../hooks/useFeedbackMutate";
 import { useStream } from "../../context/StreamContext/StreamProvider";
+import { AuthContext } from "../../context/AuthProvider/AuthProvider";
 
 const markdownComponents = {
   a: ({ ...props }) => (
@@ -142,6 +144,8 @@ const FeedbackActions = memo(function FeedbackActions({
 }) {
   const { mutate, isPending } = useFeedbackMutate();
   const queryClient = useQueryClient();
+  const { user } = useContext(AuthContext);
+  const chatScope = getChatQueryScope(user);
 
   const [submittedFeedback, setSubmittedFeedback] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -174,7 +178,7 @@ const FeedbackActions = memo(function FeedbackActions({
 
           if (chatId) {
             queryClient.invalidateQueries({
-              queryKey: ["chat-feedback", CHAT_USER_ID, chatId],
+              queryKey: chatQueryKeys.feedbacks(chatScope, chatId),
             });
           }
         },

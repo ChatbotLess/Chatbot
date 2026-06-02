@@ -1,7 +1,6 @@
 from ninja import Router
-from .schemas import UserSchemaIn, UserSchemaOut
+from .schemas import UserSchemaOut
 from .models import User
-from django.shortcuts import get_object_or_404
 
 router = Router()
 
@@ -10,16 +9,5 @@ def listar_usuarios(request):
     return User.objects.all()
 
 @router.get("/me/",response=UserSchemaOut, tags=["Usuario"])
-def me(request, idUsuario: str):
-    user = get_object_or_404(User, id=idUsuario)
-    return user
-
-@router.post("/User/",response=UserSchemaOut, tags=["Usuario"])
-def inserir_usuario(request, data: UserSchemaIn):
-    user = User(name=data.name, email=data.email, firebase_uid=data.firebase_uid)
-    user.set_password(data.password)
-    user.save()
-    return user
-
-
-
+def me(request):
+    return request.auth

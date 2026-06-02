@@ -7,8 +7,8 @@ from django.http import StreamingHttpResponse
 router = Router()
 
 @router.post("/message", tags=["Rag"])
-def enviar_mensagem(request, userid: str, message: str, chatID: Optional[str] = None):
-    chat_id, stream = responder_mensagem(userid, chatID, message)
+def enviar_mensagem(request, message: str, chatID: Optional[str] = None):
+    chat_id, stream = responder_mensagem(str(request.auth.id), chatID, message)
 
     response = StreamingHttpResponse(stream, content_type='text/plain')
     response["X-Chat-Id"] = str(chat_id)
