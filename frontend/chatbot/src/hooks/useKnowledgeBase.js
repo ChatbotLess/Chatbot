@@ -25,6 +25,13 @@ const deactivateBase = async (baseID) => {
   return response.data;
 };
 
+const createBase = async ({ titulo, versao, descricao }) => {
+  const response = await api.post("/api/base_conhecimento/criarbase", null, {
+    params: { titulo, versao, descricao },
+  });
+  return response.data;
+};
+
 // ── Hooks ────────────────────────────────────────────────────────────────────
 
 export function useKnowledgeBases() {
@@ -88,6 +95,24 @@ export function useDeactivateBase() {
     },
     onError: (_err, _baseID, context) => {
       queryClient.setQueryData(["knowledge-bases"], context?.previous);
+    },
+  });
+}
+
+export function useCreateBase() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createBase,
+    onSuccess: (createdBase) => {
+      queryClient.setQueryData(["knowledge-bases"], (current = []) => [
+        ...current.map((base) => ({
+          ...base,
+          status: "DESATIVADO",
+        })),
+        createdBase,
+      ]);
+      queryClient.invalidateQueries({ queryKey: ["knowledge-bases"] });
     },
   });
 }

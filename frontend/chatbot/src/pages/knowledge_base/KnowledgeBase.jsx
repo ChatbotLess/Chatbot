@@ -8,13 +8,16 @@ import {
   FaCalendarAlt,
   FaClock,
   FaLayerGroup,
+  FaPlus,
 } from "react-icons/fa";
 import * as Switch from "@radix-ui/react-switch";
+import { CreateKnowledgeBaseModal } from "../../components/knowledge_base/CreateKnowledgeBaseModal";
 import {
   useKnowledgeBases,
   useKnowledgeBaseDocuments,
   useActivateBase,
   useDeactivateBase,
+  useCreateBase,
 } from "../../hooks/useKnowledgeBase";
 
 // ── Helper ───────────────────────────────────────────────────────────────────
@@ -298,9 +301,11 @@ export function KnowledgeBase() {
   const { data: bases, isLoading, isError } = useKnowledgeBases();
   const activateMutation = useActivateBase();
   const deactivateMutation = useDeactivateBase();
+  const createMutation = useCreateBase();
 
   const [selectedBaseId, setSelectedBaseId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const sortedBases = useMemo(() => {
     if (!bases) return [];
@@ -343,18 +348,52 @@ export function KnowledgeBase() {
   const isToggling =
     activateMutation.isPending || deactivateMutation.isPending;
 
+  const handleCreateBase = async (formData) => {
+    const createdBase = await createMutation.mutateAsync({
+      titulo: formData.titulo.trim(),
+      versao: formData.versao.trim(),
+      descricao: formData.descricao.trim(),
+    });
+
+    setSelectedBaseId(createdBase.id);
+    setSearchQuery("");
+    setIsCreateModalOpen(false);
+  };
+
+  const handleCloseCreateModal = () => {
+    if (createMutation.isPending) return;
+    createMutation.reset();
+    setIsCreateModalOpen(false);
+  };
+
   return (
     <div className="flex h-full min-h-0 bg-gray-950">
       {/* ── Left Column: List ──────────────────────────────── */}
       <div className="flex w-full min-w-0 flex-col border-r border-gray-800 md:w-[40%] md:min-w-[340px] md:max-w-[500px]">
         {/* Header */}
         <div className="shrink-0 border-b border-gray-800 p-4 xs:p-5">
-          <h1 className="text-lg font-bold text-white xs:text-xl">
-            Bases de Conhecimento
-          </h1>
-          <p className="mt-1 text-xs text-gray-500">
-            Gerencie as bases de dados de conhecimento do chatbot
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h1 className="text-lg font-bold text-white xs:text-xl">
+                Bases de Conhecimento
+              </h1>
+              <p className="mt-1 text-xs text-gray-500">
+                Gerencie as bases de dados de conhecimento do chatbot
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                createMutation.reset();
+                setIsCreateModalOpen(true);
+              }}
+              className="flex shrink-0 items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+            >
+              <FaPlus className="text-xs" />
+              <span className="hidden xs:inline">Nova base</span>
+            </button>
+          </div>
 
           {/* Search */}
           <div className="relative mt-4">
@@ -446,6 +485,14 @@ export function KnowledgeBase() {
           <EmptyDetail />
         )}
       </div>
+
+      <CreateKnowledgeBaseModal
+        isOpen={isCreateModalOpen}
+        isPending={createMutation.isPending}
+        error={createMutation.error}
+        onClose={handleCloseCreateModal}
+        onSubmit={handleCreateBase}
+      />
     </div>
   );
 }

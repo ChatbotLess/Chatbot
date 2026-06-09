@@ -1,0 +1,222 @@
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { FaDatabase, FaTimes } from "react-icons/fa";
+
+function getErrorMessage(error) {
+  const responseData = error?.response?.data;
+
+  if (Array.isArray(responseData?.erro)) {
+    return responseData.erro.join(" ");
+  }
+
+  if (typeof responseData?.erro === "string") {
+    return responseData.erro;
+  }
+
+  if (Array.isArray(responseData?.detail)) {
+    return responseData.detail
+      .map((item) => item?.msg)
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  return error?.message || "Não foi possível criar a base de conhecimento.";
+}
+
+export function CreateKnowledgeBaseModal({
+  isOpen,
+  isPending,
+  error,
+  onClose,
+  onSubmit,
+}) {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      titulo: "",
+      versao: "",
+      descricao: "",
+    },
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      reset();
+    }
+  }, [isOpen, reset]);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape" && !isPending) {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, isPending, onClose]);
+
+  if (!isOpen) return null;
+
+  const inputClassName =
+    "w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-sm text-gray-100 outline-none transition placeholder:text-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50";
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-knowledge-base-title"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget && !isPending) {
+          onClose();
+        }
+      }}
+    >
+      <div className="max-h-full w-full max-w-lg overflow-y-auto rounded-xl border border-gray-700 bg-gray-900 p-5 shadow-2xl xs:p-6">
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/15 text-blue-400">
+              <FaDatabase />
+            </div>
+            <div>
+              <h2
+                id="create-knowledge-base-title"
+                className="text-lg font-semibold text-white"
+              >
+                Nova base de conhecimento
+              </h2>
+              <p className="mt-0.5 text-xs text-gray-500">
+                A nova base será definida como ativa.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isPending}
+            className="rounded-md p-2 text-gray-400 transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Fechar modal"
+          >
+            <FaTimes />
+          </button>
+        </div>
+
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          <div>
+            <label
+              htmlFor="knowledge-base-title"
+              className="mb-1.5 block text-sm font-medium text-gray-300"
+            >
+              Título
+            </label>
+            <input
+              id="knowledge-base-title"
+              type="text"
+              autoFocus
+              disabled={isPending}
+              placeholder="Ex.: Normas institucionais"
+              className={inputClassName}
+              {...register("titulo", {
+                required: "Informe o título.",
+                validate: (value) =>
+                  value.trim().length > 0 || "Informe o título.",
+              })}
+            />
+            {errors.titulo && (
+              <p className="mt-1 text-xs text-red-300">
+                {errors.titulo.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="knowledge-base-version"
+              className="mb-1.5 block text-sm font-medium text-gray-300"
+            >
+              Versão
+            </label>
+            <input
+              id="knowledge-base-version"
+              type="text"
+              disabled={isPending}
+              placeholder="Ex.: 1.0"
+              className={inputClassName}
+              {...register("versao", {
+                required: "Informe a versão.",
+                validate: (value) =>
+                  value.trim().length > 0 || "Informe a versão.",
+              })}
+            />
+            {errors.versao && (
+              <p className="mt-1 text-xs text-red-300">
+                {errors.versao.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="knowledge-base-description"
+              className="mb-1.5 block text-sm font-medium text-gray-300"
+            >
+              Descrição
+            </label>
+            <textarea
+              id="knowledge-base-description"
+              rows={4}
+              disabled={isPending}
+              placeholder="Descreva o conteúdo e a finalidade desta base"
+              className={`${inputClassName} resize-none`}
+              {...register("descricao", {
+                required: "Informe a descrição.",
+                validate: (value) =>
+                  value.trim().length > 0 || "Informe a descrição.",
+              })}
+            />
+            {errors.descricao && (
+              <p className="mt-1 text-xs text-red-300">
+                {errors.descricao.message}
+              </p>
+            )}
+          </div>
+
+          {error && (
+            <div
+              role="alert"
+              className="rounded-lg border border-red-900/60 bg-red-950/30 px-3 py-2 text-sm text-red-300"
+            >
+              {getErrorMessage(error)}
+            </div>
+          )}
+
+          <div className="flex flex-col-reverse gap-2 pt-1 xs:flex-row xs:justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isPending}
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={isPending}
+              className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isPending ? "Criando..." : "Criar base"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
