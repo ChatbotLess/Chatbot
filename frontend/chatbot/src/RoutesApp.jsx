@@ -15,6 +15,7 @@ import { NotFound } from './pages/NotFound';
 import { Sidebar } from './components/Sidebar';
 import PrivateRoute from './context/AuthProvider/privateRoute';
 import PublicRoute from './context/AuthProvider/publicRoute';
+import StaffRoute from './context/AuthProvider/staffRoute';
 
 function AppContent() {
   const location = useLocation();
@@ -78,17 +79,23 @@ function AppContent() {
           } />
           <Route path='/dashboard' element={
             <PrivateRoute>
-              <Dashboard />
+              <StaffRoute>
+                <Dashboard />
+              </StaffRoute>
             </PrivateRoute>
           } />
           <Route path='/upload' element={
             <PrivateRoute>
-              <FileUpload />
+              <StaffRoute>
+                <FileUpload />
+              </StaffRoute>
             </PrivateRoute>
           } />
           <Route path='/knowledge' element={
             <PrivateRoute>
-              <KnowledgeBase />
+              <StaffRoute>
+                <KnowledgeBase />
+              </StaffRoute>
             </PrivateRoute>
           } />
           <Route path='/login' element={

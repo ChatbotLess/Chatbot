@@ -11,6 +11,7 @@ db.sqlite3
 db.sqlite3-journal
 media
 /static
+/backend/staticfiles
 /frontend/dist
 firebase-service-account.json
 backend/firebase-service-account.json
