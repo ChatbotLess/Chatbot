@@ -1,3 +1,5 @@
+import secrets
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from ninja.errors import HttpError
@@ -11,7 +13,7 @@ class FeedbackApiTests(TestCase):
         user_model = get_user_model()
         self.user = user_model.objects.create_user(
             email="user@example.com",
-            password="senha-segura-123",
+            password=secrets.token_urlsafe(24),
             name="Usuario Teste",
         )
         self.chat = Chat.objects.create(titulo="Chat de teste", usuario=self.user)

@@ -34,16 +34,22 @@ const markdownComponents = {
     </code>
   ),
 
-  h1: ({ ...props }) => (
-    <h1 {...props} className="text-lg font-semibold text-white" />
+  h1: ({ children, ...props }) => (
+    <h1 {...props} className="text-lg font-semibold text-white">
+      {children}
+    </h1>
   ),
 
-  h2: ({ ...props }) => (
-    <h2 {...props} className="text-base font-semibold text-white" />
+  h2: ({ children, ...props }) => (
+    <h2 {...props} className="text-base font-semibold text-white">
+      {children}
+    </h2>
   ),
 
-  h3: ({ ...props }) => (
-    <h3 {...props} className="text-base font-semibold text-white" />
+  h3: ({ children, ...props }) => (
+    <h3 {...props} className="text-base font-semibold text-white">
+      {children}
+    </h3>
   ),
 
   ol: ({ ...props }) => (

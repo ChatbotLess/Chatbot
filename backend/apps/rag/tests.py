@@ -1,3 +1,4 @@
+import secrets
 from unittest.mock import MagicMock, patch
 
 from django.contrib.auth import get_user_model
@@ -12,7 +13,7 @@ class FazerPerguntaTests(TestCase):
         user_model = get_user_model()
         self.user = user_model.objects.create_user(
             email="rag-user@example.com",
-            password="senha-segura-123",
+            password=secrets.token_urlsafe(24),
             name="Usuario Rag",
         )
 

@@ -27,7 +27,7 @@ class Rag():
     self.temperature = temperature
     # USA O BANCO DE DADOS DO DJANGO
     db_user = os.getenv("DB_USER", "postgres")
-    db_password = os.getenv("DB_PASSWORD", "postgres")
+    db_password = os.getenv("DB_PASSWORD")
     db_host = os.getenv("DB_HOST", "localhost")
     db_port = os.getenv("DB_PORT", "5432")
     self.connection_string = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}"

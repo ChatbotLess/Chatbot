@@ -117,58 +117,58 @@ function BaseListItem({ base, isSelected, onSelect, onToggle, isToggling }) {
 
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={() => onSelect(base)}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelect(base); }}
-      className={`group flex w-full cursor-pointer gap-3 rounded-xl border px-3 py-3.5 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 xs:px-4 ${
+      className={`group flex w-full gap-3 rounded-xl border px-3 py-3.5 text-left transition-all duration-200 xs:px-4 ${
         isSelected
           ? "border-blue-500/40 bg-blue-500/10 shadow-lg shadow-blue-500/5"
           : "border-transparent hover:border-gray-800 hover:bg-gray-800/50"
       }`}
       style={isSelected ? { borderLeftWidth: "3px" } : {}}
     >
-      {/* Icon */}
-      <div
-        className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
-          isSelected
-            ? "bg-blue-500/20 text-blue-400"
-            : "bg-gray-800 text-gray-400 group-hover:text-gray-300"
-        }`}
+      <button
+        type="button"
+        aria-pressed={isSelected}
+        onClick={() => onSelect(base)}
+        className="flex min-w-0 flex-1 cursor-pointer gap-3 rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
       >
-        <FaDatabase className="text-sm" />
-      </div>
-
-      {/* Content */}
-      <div className="min-w-0 flex-1">
-        <p
-          className={`truncate text-sm font-semibold ${
-            isSelected ? "text-white" : "text-gray-200 group-hover:text-white"
+        {/* Icon */}
+        <div
+          className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
+            isSelected
+              ? "bg-blue-500/20 text-blue-400"
+              : "bg-gray-800 text-gray-400 group-hover:text-gray-300"
           }`}
         >
-          {base.titulo || "Base sem nome"}
-        </p>
-        <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-gray-500">
-          {base.descricao || "Sem descrição"}
-        </p>
-
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-600">
-          <span className="flex items-center gap-1">
-            <FaFileAlt className="text-[10px]" />
-            {base.versao || "—"}
-          </span>
-          <span className="flex items-center gap-1">
-            <FaClock className="text-[10px]" />
-            {formatDate(base.data_criacao)}
-          </span>
+          <FaDatabase className="text-sm" />
         </div>
-      </div>
+
+        {/* Content */}
+        <div className="min-w-0 flex-1">
+          <p
+            className={`truncate text-sm font-semibold ${
+              isSelected ? "text-white" : "text-gray-200 group-hover:text-white"
+            }`}
+          >
+            {base.titulo || "Base sem nome"}
+          </p>
+          <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-gray-500">
+            {base.descricao || "Sem descrição"}
+          </p>
+
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-600">
+            <span className="flex items-center gap-1">
+              <FaFileAlt className="text-[10px]" />
+              {base.versao || "—"}
+            </span>
+            <span className="flex items-center gap-1">
+              <FaClock className="text-[10px]" />
+              {formatDate(base.data_criacao)}
+            </span>
+          </div>
+        </div>
+      </button>
 
       {/* Toggle */}
-      <div
-        className="flex shrink-0 flex-col items-center gap-1.5 pt-0.5"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="flex shrink-0 flex-col items-center gap-1.5 pt-0.5">
         <Switch.Root
           checked={isActive}
           disabled={isToggling}
