@@ -1,3 +1,5 @@
+import sys
+
 from .filters import (
     LemmaTransform,
     PunctuationFilter,
@@ -45,4 +47,7 @@ __all__ = [
 
 
 if __name__ == "__main__":
-    run_text_processing_flow()
+    if len(sys.argv) != 2:
+        raise SystemExit(f"Uso: {sys.argv[0]} <caminho_do_pdf>")
+
+    run_text_processing_flow(sys.argv[1])

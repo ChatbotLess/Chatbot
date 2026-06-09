@@ -8,6 +8,7 @@ from pathlib import Path
 import os
 import requests
 import time
+from django.db import DatabaseError
 
 if not hasattr(time, "clock"):
     time.clock = time.perf_counter
@@ -221,7 +222,7 @@ def stream_resposta_rag(pergunta_usuario, chat_id):
         tipo_documento = intencao["classificacao"]
     try:
         base = Base_Conhecimento.objects.filter(status='ATIVO').first()
-    except:
+    except DatabaseError:
         base = None
 
     base_id = base.id if base else None
