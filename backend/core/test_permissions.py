@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from ninja.errors import HttpError
 
-from apps.base_conhecimento.api import criar_BaseConhecimento, listar_BaseConhecimento
+from apps.base_conhecimento.api import criar_base_conhecimento, listar_base_conhecimento
 from apps.user.api import listar_usuarios
 from core.permissions import require_staff
 
@@ -37,7 +37,7 @@ class StaffPermissionTests(TestCase):
         self.assertEqual(error.exception.status_code, 403)
 
     def test_regular_user_cannot_list_users_or_knowledge_bases(self):
-        for endpoint in (listar_usuarios, listar_BaseConhecimento):
+        for endpoint in (listar_usuarios, listar_base_conhecimento):
             with self.subTest(endpoint=endpoint.__name__):
                 with self.assertRaises(HttpError) as error:
                     endpoint(self.request_for(self.user))
@@ -46,7 +46,7 @@ class StaffPermissionTests(TestCase):
 
     def test_regular_user_cannot_create_knowledge_base(self):
         with self.assertRaises(HttpError) as error:
-            criar_BaseConhecimento(
+            criar_base_conhecimento(
                 self.request_for(self.user),
                 titulo="Base privada",
                 versao="1",
@@ -58,14 +58,14 @@ class StaffPermissionTests(TestCase):
     def test_staff_can_access_admin_operations(self):
         request = self.request_for(self.admin)
 
-        base = criar_BaseConhecimento(
+        base = criar_base_conhecimento(
             request,
             titulo="Base administrativa",
             versao="1",
             descricao="Base permitida",
         )
 
-        self.assertEqual(list(listar_BaseConhecimento(request)), [base])
+        self.assertEqual(list(listar_base_conhecimento(request)), [base])
         self.assertSetEqual(
             {user.id for user in listar_usuarios(request)},
             {self.user.id, self.admin.id},

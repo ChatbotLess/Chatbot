@@ -10,7 +10,7 @@ from core.permissions import require_staff
 router = Router()
 
 @router.get("/listarbase",response=list[BaseConhecimentoOut], tags=["Base Conhecimento"])
-def listar_BaseConhecimento(request):
+def listar_base_conhecimento(request):
   require_staff(request)
   return Base_Conhecimento.objects.all()
 
@@ -50,7 +50,7 @@ def desativar_base(request, baseID: int):
 
 
 @router.post("/criarbase",response={200: BaseConhecimentoOut, 400: ErroSchema}, tags=["Base Conhecimento"])
-def criar_BaseConhecimento(request,titulo : str, versao : str, descricao : str):
+def criar_base_conhecimento(request,titulo : str, versao : str, descricao : str):
   require_staff(request)
   base = Base_Conhecimento(
     titulo = titulo, 
