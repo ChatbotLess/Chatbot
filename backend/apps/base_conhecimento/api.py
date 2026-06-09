@@ -5,15 +5,18 @@ from django.core.exceptions import ValidationError
 from .schemas import DocumentoSchemaOut, BaseConhecimentoIn, BaseConhecimentoOut, ErroSchema
 from .models import Documento, Base_Conhecimento
 from apps.base_conhecimento.tasks import processar_documento_rag
+from core.permissions import require_staff
 
 router = Router()
 
 @router.get("/listarbase",response=list[BaseConhecimentoOut], tags=["Base Conhecimento"])
 def listar_BaseConhecimento(request):
+  require_staff(request)
   return Base_Conhecimento.objects.all()
 
 @router.post("/ativarbase",response={200: BaseConhecimentoOut, 400: ErroSchema}, tags=["Base Conhecimento"])
 def ativar_base(request, baseID: int):
+    require_staff(request)
     # desativa a atual
     Base_Conhecimento.objects.filter(
         status=Base_Conhecimento.StatusBaseDocumento.Ativo
@@ -33,6 +36,7 @@ def ativar_base(request, baseID: int):
   
 @router.post("/desativarbase",response={200: BaseConhecimentoOut, 400: ErroSchema}, tags=["Base Conhecimento"])
 def desativar_base(request, baseID: int):
+    require_staff(request)
     base = get_object_or_404(Base_Conhecimento, id=baseID)
     try:
         base.status = Base_Conhecimento.StatusBaseDocumento.Desativado
@@ -47,6 +51,7 @@ def desativar_base(request, baseID: int):
 
 @router.post("/criarbase",response={200: BaseConhecimentoOut, 400: ErroSchema}, tags=["Base Conhecimento"])
 def criar_BaseConhecimento(request,titulo : str, versao : str, descricao : str):
+  require_staff(request)
   base = Base_Conhecimento(
     titulo = titulo, 
     versao = versao, 
@@ -70,7 +75,7 @@ def criar_BaseConhecimento(request,titulo : str, versao : str, descricao : str):
 
 @router.post("/upload", tags=["Documento"])
 def upload(request, base_id: int, file: File[UploadedFile], tipo: str):
-  user = request.auth
+  user = require_staff(request)
   base = get_object_or_404(Base_Conhecimento, id=base_id)
   tipo = tipo.upper()
   doc = Documento(
@@ -104,9 +109,11 @@ def upload(request, base_id: int, file: File[UploadedFile], tipo: str):
 
 @router.get('/listardocumentos', response=list[DocumentoSchemaOut], tags=["Documento"])
 def listar_documentos(request):
+  require_staff(request)
   return Documento.objects.all()
 
 
 @router.get('/listardocumentosbase', response=list[DocumentoSchemaOut], tags=["Documento"])
 def listar_documentos_base(request, baseID):
+  require_staff(request)
   return Documento.objects.filter(base_id=baseID)

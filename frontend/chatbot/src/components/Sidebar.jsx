@@ -7,12 +7,12 @@ import { AuthContext } from "../context/AuthProvider/AuthProvider";
 import { useChatData } from "../hooks/useChatData";
 
 export function Sidebar({ onNavigate }) {
-  const { logOut, user } = useContext(AuthContext);
+  const { logOut, user, profile } = useContext(AuthContext);
   const { data, isError, isLoading } = useChatData(!!user);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
-  const userName = user?.displayName || user?.email?.split("@")[0] || "Usuario";
+  const userName = profile?.name || user?.displayName || user?.email?.split("@")[0] || "Usuario";
 
   const handleLogout = async () => {
     try {
@@ -59,29 +59,33 @@ export function Sidebar({ onNavigate }) {
             Nova Conversa
           </button>
 
-          <button
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
-            onClick={() => handleNavigate("/upload")}
-          >
-            <FaFileUpload className="shrink-0 text-gray-400" />
-            Inserir Documentos
-          </button>
+          {profile?.is_staff && (
+            <>
+              <button
+                className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                onClick={() => handleNavigate("/upload")}
+              >
+                <FaFileUpload className="shrink-0 text-gray-400" />
+                Inserir Documentos
+              </button>
 
-          <button
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
-            onClick={() => handleNavigate("/dashboard")}
-          >
-            <FaChartBar className="shrink-0 text-gray-400" />
-            Dashboard
-          </button>
+              <button
+                className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                onClick={() => handleNavigate("/dashboard")}
+              >
+                <FaChartBar className="shrink-0 text-gray-400" />
+                Dashboard
+              </button>
 
-          <button
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
-            onClick={() => handleNavigate("/knowledge")}
-          >
-            <FaDatabase className="shrink-0 text-gray-400" />
-            Bases de Conhecimento
-          </button>
+              <button
+                className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                onClick={() => handleNavigate("/knowledge")}
+              >
+                <FaDatabase className="shrink-0 text-gray-400" />
+                Bases de Conhecimento
+              </button>
+            </>
+          )}
         </nav>
       </div>
 
@@ -150,7 +154,7 @@ export function Sidebar({ onNavigate }) {
           <span className="truncate font-medium uppercase text-white">{userName}</span>
 
           <span className="text-sm text-gray-400">
-            (ADMIN) {/* CARGO DO BANCO */}
+            {profile?.is_staff ? "Admin" : "Usuario"}
           </span>
         </div>
 
