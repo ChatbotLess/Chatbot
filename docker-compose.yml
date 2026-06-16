@@ -1,0 +1,151 @@
+services:
+  db-postgres:
+    image: ankane/pgvector:latest
+    container_name: chatbot_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: chatbot_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d chatbot_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - chatbot
+
+  redis:
+    image: redis:7-alpine
+    container_name: chatbot_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - chatbot
+
+  classificador:
+    image: integracar/classificador:latest
+    container_name: chatbot_classificador
+    ports:
+      - "8001:8000"
+    networks:
+      - chatbot
+
+  backend:
+    build:
+      context: ./backend
+    container_name: chatbot_backend
+    command:
+      - sh
+      - -c
+      - >
+        python manage.py migrate &&
+        python manage.py collectstatic --noinput &&
+        exec gunicorn core.wsgi:application
+        --bind 0.0.0.0:8000
+        --worker-class gthread
+        --workers 2
+        --threads 4
+        --timeout 300
+        --access-logfile -
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_NAME: chatbot_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: db-postgres
+      DB_PORT: 5432
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      CLASSIFICADOR_URL: http://classificador:8000/classificar
+      FIREBASE_CREDENTIALS_PATH: /run/secrets/firebase-service-account.json
+    volumes:
+      - backend_media:/app/media
+      - backend_static:/app/staticfiles
+      - ./backend/chatbotless-firebase-adminsdk-fbsvc-c573eb97fa.json:/run/secrets/firebase-service-account.json:ro
+    depends_on:
+      db-postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      classificador:
+        condition: service_started
+    networks:
+      - chatbot
+
+  celery:
+    build:
+      context: ./backend
+    container_name: chatbot_celery
+    command: celery -A core worker -l info
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_NAME: chatbot_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: db-postgres
+      DB_PORT: 5432
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      CLASSIFICADOR_URL: http://classificador:8000/classificar
+      FIREBASE_CREDENTIALS_PATH: /run/secrets/firebase-service-account.json
+    volumes:
+      - backend_media:/app/media
+      - ./backend/chatbotless-firebase-adminsdk-fbsvc-c573eb97fa.json:/run/secrets/firebase-service-account.json:ro
+    depends_on:
+      db-postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      classificador:
+        condition: service_started
+    networks:
+      - chatbot
+
+  frontend:
+    build:
+      context: ./frontend/chatbot
+    container_name: chatbot_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - chatbot
+
+  pg-admin:
+    image: dpage/pgadmin4
+    container_name: pg_admin
+    ports:
+      - "15432:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: postgres@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: postgres
+    depends_on:
+      - db-postgres
+    networks:
+      - chatbot
+
+volumes:
+  postgres_data:
+  redis_data:
+  backend_media:
+  backend_static:
+
+networks:
+  chatbot:
+    driver: bridge
