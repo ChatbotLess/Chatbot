@@ -1,0 +1,35 @@
+{
+  "history": [
+    {
+      "id": "chat-1",
+      "titulo": "Conversa antiga",
+      "data": "2026-05-13T12:00:00.000Z"
+    }
+  ],
+  "newChatId": "chat-2",
+  "newMessages": [
+    {
+      "id": 201,
+      "role": "user",
+      "conteudo": "Como funciona?"
+    },
+    {
+      "id": 202,
+      "role": "assistant",
+      "conteudo": "Resposta gerada pelo teste."
+    }
+  ],
+  "existingMessages": [
+    {
+      "id": 301,
+      "role": "user",
+      "conteudo": "Explique a base de conhecimento."
+    },
+    {
+      "id": 302,
+      "role": "assistant",
+      "conteudo": "A base de conhecimento guarda documentos indexados para consulta."
+    }
+  ],
+  "feedbacks": []
+}

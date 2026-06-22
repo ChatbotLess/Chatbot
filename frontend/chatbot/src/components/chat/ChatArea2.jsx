@@ -6,7 +6,6 @@ import remarkGfm from "remark-gfm";
 import { FeedbackModal } from "../FeedbackModal";
 import { Promptbar } from "../Promptbar";
 import {
-  CHAT_USER_ID,
   useChatFeedbacks,
   useChatMessages,
 } from "../../hooks/useChatData";
@@ -139,6 +138,7 @@ const FeedbackActions = memo(function FeedbackActions({
   chatId,
   initialFeedback,
   messageId,
+  userId,
 }) {
   const { mutate, isPending } = useFeedbackMutate();
   const queryClient = useQueryClient();
@@ -172,9 +172,9 @@ const FeedbackActions = memo(function FeedbackActions({
           setFeedbackText(feedback?.mensagem_feedback ?? mensagem_feedback);
           setErrorMessage("");
 
-          if (chatId) {
+          if (chatId && userId) {
             queryClient.invalidateQueries({
-              queryKey: ["chat-feedback", CHAT_USER_ID, chatId],
+              queryKey: ["chat-feedback", userId, chatId],
             });
           }
         },
@@ -220,6 +220,7 @@ const FeedbackActions = memo(function FeedbackActions({
           type="button"
           onClick={handleLike}
           disabled={isPending}
+          data-cy="feedback-like"
           className={`rounded-md p-1.5 transition disabled:opacity-50 ${
             selectedFeedback === "LIKE"
               ? "bg-blue-500/20 text-blue-200"
@@ -235,6 +236,7 @@ const FeedbackActions = memo(function FeedbackActions({
           type="button"
           onClick={handleDislikeClick}
           disabled={isPending}
+          data-cy="feedback-dislike"
           className={`rounded-md p-1.5 transition disabled:opacity-50 ${
             selectedFeedback === "DISLIKE"
               ? "bg-red-500/20 text-red-200"
@@ -272,11 +274,12 @@ const MessageBubble = memo(function MessageBubble({
   chatId,
   feedback,
   message,
+  userId,
 }) {
   const isUser = message.role === "user";
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`} data-cy={`message-${message.role}`}>
       <div className={`max-w-[85%] ${isUser ? "flex justify-end" : ""}`}>
         <div
           className={
@@ -284,6 +287,7 @@ const MessageBubble = memo(function MessageBubble({
           }
         >
           <article
+            data-message-id={message.id}
             className={`break-words rounded-lg px-4 py-3 text-sm leading-6 shadow-sm ${
               isUser
                 ? "whitespace-pre-wrap bg-blue-600 text-white"
@@ -302,6 +306,7 @@ const MessageBubble = memo(function MessageBubble({
               chatId={chatId}
               initialFeedback={feedback}
               messageId={message.id}
+              userId={userId}
             />
           )}
         </div>
@@ -331,7 +336,7 @@ export function ChatArea2({ conversationId }) {
     isLoading,
   } = useChatMessages(conversationId, Boolean(conversationId));
 
-  const { data: feedbacks = [] } = useChatFeedbacks(
+  const { data: feedbacks = [], userId } = useChatFeedbacks(
     conversationId,
     Boolean(conversationId)
   );
@@ -432,6 +437,7 @@ export function ChatArea2({ conversationId }) {
                 chatId={conversationId}
                 feedback={feedbackByMessageId.get(String(message.id))}
                 message={message}
+                userId={userId}
               />
             ))}
           </div>

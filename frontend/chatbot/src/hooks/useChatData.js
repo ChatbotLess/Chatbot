@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "../services/api";
+import { useBackendUser } from "./useKnowledgeBaseDocuments";
 
-export const CHAT_USER_ID = "2d74241b-300e-409e-8041-f96d769a6787";
+export const CHAT_USER_ID = null;
 
 const fetchChats = async (userId) => {
   const response = await api.get("/api/chat/listarchats", {
@@ -38,35 +39,62 @@ const fetchChatFeedbacks = async ({ userId, chatId }) => {
 };
 
 export function useChatData(enabled = true, userId = CHAT_USER_ID){
+  const backendUserQuery = useBackendUser(enabled && !userId);
+  const resolvedUserId = userId ?? backendUserQuery.data?.id;
+
   const query = useQuery({
-    queryFn: () => fetchChats(userId),
-    queryKey: ['chat-data', userId],
+    queryFn: () => fetchChats(resolvedUserId),
+    queryKey: ['chat-data', resolvedUserId],
     refetchOnWindowFocus: false,
-    enabled: enabled && Boolean(userId),
+    enabled: enabled && Boolean(resolvedUserId),
   })
 
-  return query;
+  return {
+    ...query,
+    data: query.data ?? [],
+    isError: query.isError || backendUserQuery.isError,
+    isLoading: query.isLoading || backendUserQuery.isLoading,
+    userId: resolvedUserId,
+  };
 }
 
 export function useChatFeedbacks(chatId, enabled = true, userId = CHAT_USER_ID) {
+  const backendUserQuery = useBackendUser(enabled && !userId);
+  const resolvedUserId = userId ?? backendUserQuery.data?.id;
+
   const query = useQuery({
-    queryFn: () => fetchChatFeedbacks({ userId, chatId }),
-    queryKey: ['chat-feedback', userId, chatId],
+    queryFn: () => fetchChatFeedbacks({ userId: resolvedUserId, chatId }),
+    queryKey: ['chat-feedback', resolvedUserId, chatId],
     refetchOnWindowFocus: false,
-    enabled: enabled && Boolean(userId) && Boolean(chatId),
+    enabled: enabled && Boolean(resolvedUserId) && Boolean(chatId),
   });
 
-  return query;
+  return {
+    ...query,
+    data: query.data ?? [],
+    isError: query.isError || backendUserQuery.isError,
+    isLoading: query.isLoading || backendUserQuery.isLoading,
+    userId: resolvedUserId,
+  };
 }
 
 export function useChatMessages(chatId, enabled = true, userId = CHAT_USER_ID) {
+  const backendUserQuery = useBackendUser(enabled && !userId);
+  const resolvedUserId = userId ?? backendUserQuery.data?.id;
+
   const query = useQuery({
-    queryFn: () => fetchChatMessages({ userId, chatId }),
-    queryKey: ['chat-messages', userId, chatId],
+    queryFn: () => fetchChatMessages({ userId: resolvedUserId, chatId }),
+    queryKey: ['chat-messages', resolvedUserId, chatId],
     refetchOnWindowFocus: false,
-    enabled: enabled && Boolean(userId) && Boolean(chatId),
+    enabled: enabled && Boolean(resolvedUserId) && Boolean(chatId),
   });
 
-  return query;
+  return {
+    ...query,
+    data: query.data ?? [],
+    isError: query.isError || backendUserQuery.isError,
+    isLoading: query.isLoading || backendUserQuery.isLoading,
+    userId: resolvedUserId,
+  };
 }
 

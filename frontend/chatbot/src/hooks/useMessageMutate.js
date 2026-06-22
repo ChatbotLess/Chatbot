@@ -1,7 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
 
-const BASE_URL = `http://${window.location.hostname}:8000`;
-
 /**
  * Envia uma mensagem para o backend via streaming (fetch nativo).
  * Retorna { chatId, stream } onde:
@@ -12,7 +10,7 @@ const postMessage = async ({ userid, message, chatID = null }) => {
   const queryParams = new URLSearchParams({ userid, message });
   if (chatID) queryParams.set("chatID", chatID);
 
-  const response = await fetch(`${BASE_URL}/api/rag/message?${queryParams.toString()}`, {
+  const response = await fetch(`/api/rag/message?${queryParams.toString()}`, {
     method: "POST",
     headers: { accept: "*/*" },
   });

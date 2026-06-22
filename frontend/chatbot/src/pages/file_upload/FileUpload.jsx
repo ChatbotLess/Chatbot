@@ -7,7 +7,7 @@ export function FileUpload() {
         <header className="mb-8">
           <h1 className="text-3xl font-bold text-white">Inserir documentos</h1>
           <p className="mt-2 text-sm text-gray-400">
-            Faça o envio de arquivos PDF e acompanhe a lista de documentos adicionados.
+            Prepare arquivos PDF em memoria antes de envia-los para a base.
           </p>
         </header>
 

@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useMessageMutate } from "../hooks/useMessageMutate";
 import { useStream } from "../context/StreamContext/StreamProvider";
 import { useQueryClient } from "@tanstack/react-query";
-import { CHAT_USER_ID } from "../hooks/useChatData";
+import { useBackendUser } from "../hooks/useKnowledgeBaseDocuments";
 
 export function Promptbar() {
   const { register, handleSubmit, reset } = useForm();
@@ -13,42 +13,40 @@ export function Promptbar() {
   const { mutate, isPending } = useMessageMutate();
   const { startStream, clearStream, isStreaming } = useStream();
   const queryClient = useQueryClient();
+  const {
+    data: backendUser,
+    isError: isBackendUserError,
+    isLoading: isBackendUserLoading,
+  } = useBackendUser();
 
   const handlePerguntar = (data) => {
     const message = data.message?.trim();
-    if (!message || isStreaming) return;
+    if (!message || isStreaming || !backendUser?.id) return;
 
-    // Limpa stream anterior
     clearStream();
 
     mutate(
       {
-        userid: "2d74241b-300e-409e-8041-f96d769a6787",
+        userid: backendUser.id,
         message,
         chatID: conversationId ?? null,
       },
       {
         onSuccess: async ({ chatId, stream }) => {
-          // Se é um chat novo, navega imediatamente para a rota correta
           if (!conversationId && chatId) {
             navigate(`/chat/${chatId}`);
           }
 
-          // Lê o stream token a token
           await startStream(stream, message);
 
-          // Stream acabou - aguarda o banco estar pronto ANTES de limpar os balões
-          // refetchQueries retorna uma Promise que resolve quando o dado chegou
           await queryClient.refetchQueries({
-            queryKey: ["chat-messages", CHAT_USER_ID, chatId ?? conversationId],
+            queryKey: ["chat-messages", backendUser.id, chatId ?? conversationId],
           });
 
-          // Agora que o banco está no cache, remove os balões de streaming
           clearStream();
 
-          // Atualiza a lista de chats na sidebar (não precisa aguardar)
           queryClient.invalidateQueries({
-            queryKey: ["chat-data", CHAT_USER_ID],
+            queryKey: ["chat-data", backendUser.id],
           });
         },
       }
@@ -57,14 +55,19 @@ export function Promptbar() {
     reset();
   };
 
-  const busy = isPending || isStreaming;
+  const busy = isPending || isStreaming || isBackendUserLoading || isBackendUserError;
 
   return (
-    <form className="w-full" onSubmit={handleSubmit(handlePerguntar)}>
+    <form className="w-full" onSubmit={handleSubmit(handlePerguntar)} data-cy="prompt-form">
       <div className="flex items-center bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 gap-2">
         <input
           type="text"
-          placeholder="Olá, como posso te ajudar?"
+          data-cy="prompt-input"
+          placeholder={
+            isBackendUserError
+              ? "Nao foi possivel carregar o usuario"
+              : "Ola, como posso te ajudar?"
+          }
           className="flex bg-transparent outline-none text-gray-200 placeholder-gray-400 w-[100%] disabled:opacity-50"
           disabled={busy}
           {...register("message", { required: true })}
@@ -72,6 +75,7 @@ export function Promptbar() {
         <button
           type="submit"
           disabled={busy}
+          data-cy="prompt-submit"
           className="p-2 rounded-lg hover:bg-gray-700 transition disabled:opacity-40"
         >
           <TbSend size={20} className="text-gray-300" />

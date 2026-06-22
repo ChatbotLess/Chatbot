@@ -1,5 +1,12 @@
 import { useContext } from "react";
-import { FaChartBar, FaEllipsisV, FaFileUpload, FaPlus, FaUser } from "react-icons/fa";
+import {
+  FaChartBar,
+  FaDatabase,
+  FaEllipsisV,
+  FaFileUpload,
+  FaPlus,
+  FaUser,
+} from "react-icons/fa";
 import { MdLogout, MdOutlineMessage } from "react-icons/md";
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthProvider/AuthProvider";
@@ -11,6 +18,14 @@ export function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
   const userName = user?.displayName || user?.email?.split("@")[0] || "Usuario";
+  const getNavButtonClass = (path) =>
+    `flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition ${
+      location.pathname === path
+        ? "bg-blue-600/20 text-white ring-1 ring-blue-500/40"
+        : "hover:bg-gray-800 hover:text-white"
+    }`;
+  const getNavIconClass = (path) =>
+    `shrink-0 ${location.pathname === path ? "text-blue-300" : "text-gray-400"}`;
 
   const handleLogout = async () => {
     try {
@@ -22,7 +37,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="flex h-screen w-[min(18rem,85vw)] shrink-0 flex-col overflow-hidden rounded-r-lg border-r border-gray-800 bg-gray-900 px-3 py-4 text-gray-200 shadow-xl shadow-black/20">
+    <aside className="flex h-screen w-[min(18rem,85vw)] shrink-0 flex-col overflow-hidden rounded-r-lg border-r border-gray-800 bg-gray-900 px-3 py-4 text-gray-200 shadow-xl shadow-black/20" data-cy="sidebar">
       <div className="shrink-0">
         <header
           className="mb-6 flex cursor-pointer items-center gap-2 px-1 transition hover:opacity-80"
@@ -34,26 +49,38 @@ export function Sidebar() {
 
         <nav className="flex flex-col gap-1">
           <button
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white"
+            className={getNavButtonClass("/")}
+            data-cy="sidebar-new-chat"
             onClick={() => navigate("/")}
           >
-            <FaPlus className="shrink-0 text-gray-400" />
+            <FaPlus className={getNavIconClass("/")} />
             Nova Conversa
           </button>
 
           <button
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white"
+            className={getNavButtonClass("/upload")}
+            data-cy="sidebar-upload"
             onClick={() => navigate("/upload")}
           >
-            <FaFileUpload className="shrink-0 text-gray-400" />
+            <FaFileUpload className={getNavIconClass("/upload")} />
             Inserir Documentos
           </button>
 
           <button
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white"
+            className={getNavButtonClass("/base-conhecimento")}
+            data-cy="sidebar-knowledge-base"
+            onClick={() => navigate("/base-conhecimento")}
+          >
+            <FaDatabase className={getNavIconClass("/base-conhecimento")} />
+            Base de Conhecimento
+          </button>
+
+          <button
+            className={getNavButtonClass("/dashboard")}
+            data-cy="sidebar-dashboard"
             onClick={() => navigate("/dashboard")}
           >
-            <FaChartBar className="shrink-0 text-gray-400" />
+            <FaChartBar className={getNavIconClass("/dashboard")} />
             Dashboard
           </button>
         </nav>
@@ -65,6 +92,7 @@ export function Sidebar() {
             Historico de conversa
           </h3>
           <span className="rounded-full bg-gray-800 px-2 py-0.5 text-xs text-gray-400">
+            <span className="sr-only">Total de conversas: </span>
             {data?.length ?? 0}
           </span>
         </div>
@@ -94,6 +122,7 @@ export function Sidebar() {
             return (
               <button
                 key={chat.id}
+                data-cy="chat-history-item"
                 className={`group flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition ${
                   isActive
                     ? "bg-blue-600/20 text-white ring-1 ring-blue-500/40"
@@ -130,6 +159,7 @@ export function Sidebar() {
         <button
           onClick={handleLogout}
           className="cursor-pointer rounded-md p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white"
+          data-cy="logout-button"
           title="Sair"
           type="button"
         >

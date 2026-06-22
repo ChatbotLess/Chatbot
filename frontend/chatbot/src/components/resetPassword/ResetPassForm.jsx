@@ -10,7 +10,7 @@ export function ResetPassForm() {
     const [searchParams] = useSearchParams();
     const oobCode = searchParams.get("oobCode");
 
-    const { register, handleSubmit, watch, formState: { errors } } = useForm();
+    const { register, handleSubmit, watch } = useForm();
     const { confirmPassword } = useContext(AuthContext);
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
@@ -29,9 +29,9 @@ export function ResetPassForm() {
     }
 
     return (
-        <div className="bg-gray-900 rounded-lg p-10 shadow-xl w-full max-w-md">
+        <div className="bg-gray-900 rounded-lg p-10 shadow-xl w-full max-w-md" data-cy="reset-password-card">
 
-            <form className="space-y-5" onSubmit={handleSubmit(handleSignup)}>
+            <form className="space-y-5" onSubmit={handleSubmit(handleSignup)} data-cy="reset-password-form">
                 <header className="mb-6">
                     <h1 className="text-2xl font-bold text-white">Alterar Senha</h1>
                 </header>
@@ -46,6 +46,7 @@ export function ResetPassForm() {
                         name="senha"
                         id="senha"
                         placeholder="Escreva sua senha"
+                        data-cy="reset-password-input"
                         className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
                         {...register('senha', {
                             required: "Senha obrigatória",
@@ -66,6 +67,7 @@ export function ResetPassForm() {
                         name="senha2"
                         id="senha2"
                         placeholder="Escreva sua senha"
+                        data-cy="reset-confirm-password-input"
                         className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
                         {...register('senha2', {
                             required: "Confirme sua senha",
@@ -79,12 +81,14 @@ export function ResetPassForm() {
                     <button
                         type="submit"
                         disabled={isLoading}
+                        data-cy="reset-password-submit"
                         className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isLoading ? "Cadastrando..." : "Cadastrar-se"}
                     </button>
                     <button
                         type="button"
+                        data-cy="reset-password-back"
                         className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900" 
                         onClick={() => navigate('/login')}
                     >

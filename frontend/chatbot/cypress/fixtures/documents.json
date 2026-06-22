@@ -1,0 +1,26 @@
+{
+  "bases": [
+    {
+      "id": 1,
+      "titulo": "Base principal",
+      "descricao": "Base usada nos testes E2E",
+      "versao": "1.0"
+    }
+  ],
+  "items": [
+    {
+      "id": "doc-1",
+      "nome_documento": "rod-2026.pdf",
+      "tipo": "ROD",
+      "status": "CONCLUIDO",
+      "data_atualizacao": "2026-05-13T15:30:00.000Z"
+    },
+    {
+      "id": "doc-2",
+      "nome_documento": "portaria-123.pdf",
+      "tipo": "PORTARIA",
+      "status": "PROCESSANDO",
+      "data_atualizacao": "2026-05-14T10:15:00.000Z"
+    }
+  ]
+}

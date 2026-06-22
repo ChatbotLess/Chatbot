@@ -4,7 +4,7 @@ import { MdOutlineMessage } from "react-icons/md";
 
 export function ChatArea1() {
   return (
-    <div className="flex flex-col w-full justify-center items-center ">
+    <div className="flex flex-col w-full justify-center items-center " data-cy="new-chat-page">
       <div className="flex flex-col items-center mb-8">
         <div className="flex items-center gap-3 mb-2">
           <MdOutlineMessage className="text-white text-6xl" />

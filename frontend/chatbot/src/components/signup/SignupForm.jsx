@@ -6,7 +6,7 @@ import api from "../../services/api";
 
 
 export function SignupForm() {
-    const { register, handleSubmit, watch, formState: { errors } } = useForm();
+    const { register, handleSubmit, watch } = useForm();
     const { createUser } = useContext(AuthContext);
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
@@ -35,9 +35,9 @@ export function SignupForm() {
     }
 
     return (
-        <div className="bg-gray-900 rounded-lg p-10 shadow-xl w-full max-w-md">
+        <div className="bg-gray-900 rounded-lg p-10 shadow-xl w-full max-w-md" data-cy="signup-card">
 
-            <form className="space-y-5" onSubmit={handleSubmit(handleSignup)}>
+            <form className="space-y-5" onSubmit={handleSubmit(handleSignup)} data-cy="signup-form">
                 <header className="mb-6">
                     <h1 className="text-2xl font-bold text-white">Cadastrar</h1>
                 </header>
@@ -51,6 +51,7 @@ export function SignupForm() {
                         name="nome"
                         id="nome"
                         placeholder="Escreva seu nome"
+                        data-cy="signup-name"
                         className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
                         {...register('nome', { required: true })}
                     />
@@ -66,6 +67,7 @@ export function SignupForm() {
                         name="email"
                         id="email"
                         placeholder="Escreva seu email"
+                        data-cy="signup-email"
                         className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
                         {...register('email', { required: true })}
                     />
@@ -80,6 +82,7 @@ export function SignupForm() {
                         name="senha"
                         id="senha"
                         placeholder="Escreva sua senha"
+                        data-cy="signup-password"
                         className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
                         {...register('senha', {
                             required: "Senha obrigatória",
@@ -100,6 +103,7 @@ export function SignupForm() {
                         name="senha2"
                         id="senha2"
                         placeholder="Escreva sua senha"
+                        data-cy="signup-confirm-password"
                         className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
                         {...register('senha2', {
                             required: "Confirme sua senha",
@@ -113,12 +117,14 @@ export function SignupForm() {
                     <button
                         type="submit"
                         disabled={isLoading}
+                        data-cy="signup-submit"
                         className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isLoading ? "Cadastrando..." : "Cadastrar-se"}
                     </button>
                     <button
                         type="button"
+                        data-cy="signup-back"
                         className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900"
                         onClick={() => navigate('/login')}
                     >

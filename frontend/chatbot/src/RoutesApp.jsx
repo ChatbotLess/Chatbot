@@ -8,6 +8,7 @@ import { ResetPassPage } from './pages/reset_password/ResetPassPage';
 import { ResetPassPage2 } from './pages/reset_password/ResetPassPage2';
 import { Dashboard } from './pages/dashboard/Dashboard';
 import { FileUpload } from './pages/file_upload/FileUpload';
+import { KnowledgeBase } from './pages/knowledge_base/KnowledgeBase';
 import { NotFound } from './pages/NotFound';
 import { Sidebar } from './components/Sidebar';
 import PrivateRoute from './context/AuthProvider/privateRoute';
@@ -15,7 +16,7 @@ import PublicRoute from './context/AuthProvider/publicRoute';
 
 function AppContent() {
   const location = useLocation();
-  const validRoutes = ['/', '/chat', '/dashboard', '/upload', '/login', '/signup'];
+  const validRoutes = ['/', '/chat', '/dashboard', '/upload', '/base-conhecimento', '/login', '/signup'];
   const isValidRoute = validRoutes.includes(location.pathname) || location.pathname.startsWith('/chat/');
   const showSidebar = isValidRoute && !['/login', '/signup'].includes(location.pathname.toLowerCase()); 
 
@@ -47,6 +48,11 @@ function AppContent() {
           <Route path='/upload' element={
             <PrivateRoute>
               <FileUpload />
+            </PrivateRoute>
+          } />
+          <Route path='/base-conhecimento' element={
+            <PrivateRoute>
+              <KnowledgeBase />
             </PrivateRoute>
           } />
           <Route path='/login' element={
