@@ -14,8 +14,9 @@ describe("chat", () => {
         cy.intercept("POST", "/api/rag/message*", (req) => {
           const url = new URL(req.url);
 
-          expect(url.searchParams.get("userid")).to.eq(backendUser.id);
+          expect(url.searchParams.get("userid")).to.eq(null);
           expect(url.searchParams.get("message")).to.eq("Como funciona?");
+          expect(req.headers.authorization).to.eq("Bearer e2e-token");
 
           req.reply({
             statusCode: 200,

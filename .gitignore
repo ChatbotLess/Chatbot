@@ -11,7 +11,11 @@ db.sqlite3
 db.sqlite3-journal
 media
 /static
+/backend/staticfiles
 /frontend/dist
+firebase-service-account.json
+backend/firebase-service-account.json
+backend/*firebase-adminsdk*.json
 
 # If your build process includes running collectstatic, then you probably don't need or want to include staticfiles/
 # in your Git repository. Update and uncomment the following line accordingly.

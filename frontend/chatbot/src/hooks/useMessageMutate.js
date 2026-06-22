@@ -1,4 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
+import { getAuthHeaders } from "../services/api";
+
+const isE2EAuthEnabled = import.meta.env.VITE_E2E_AUTH === "true";
+const BASE_URL = isE2EAuthEnabled ? "" : `http://${window.location.hostname}:8000`;
 
 /**
  * Envia uma mensagem para o backend via streaming (fetch nativo).
@@ -6,17 +10,19 @@ import { useMutation } from "@tanstack/react-query";
  *   - chatId: o ID do chat criado ou existente (lido do header X-Chat-Id)
  *   - stream: ReadableStream para consumo token a token
  */
-const postMessage = async ({ userid, message, chatID = null }) => {
-  const queryParams = new URLSearchParams({ userid, message });
+const postMessage = async ({ message, chatID = null }) => {
+  const queryParams = new URLSearchParams({ message });
   if (chatID) queryParams.set("chatID", chatID);
 
-  const response = await fetch(`/api/rag/message?${queryParams.toString()}`, {
+  const authHeaders = await getAuthHeaders();
+
+  const response = await fetch(`${BASE_URL}/api/rag/message?${queryParams.toString()}`, {
     method: "POST",
-    headers: { accept: "*/*" },
+    headers: { accept: "*/*", ...authHeaders },
   });
 
   if (!response.ok) {
-    throw new Error(`Erro na requisição: ${response.status}`);
+    throw new Error(`Erro na requisicao: ${response.status}`);
   }
 
   const chatId = response.headers.get("X-Chat-Id");

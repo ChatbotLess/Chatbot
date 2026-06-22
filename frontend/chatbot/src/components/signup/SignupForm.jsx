@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useContext, useState } from "react";
+import { updateProfile } from "firebase/auth";
 import { AuthContext } from "../../context/AuthProvider/AuthProvider";
 import { useForm } from 'react-hook-form';
-import api from "../../services/api";
 
+const isE2EAuthEnabled = import.meta.env.VITE_E2E_AUTH === "true";
 
 export function SignupForm() {
     const { register, handleSubmit, watch } = useForm();
@@ -17,14 +18,10 @@ export function SignupForm() {
         try {
             const credential = await createUser(data.email, data.senha);
 
-            const payload = {
-                firebase_uid: credential.user.uid,
-                email: credential.user.email,
-                password: data.senha,
-                name: data.nome
-            };
-
-            await api.post("/api/users/User/", payload);
+            if (!isE2EAuthEnabled) {
+                await updateProfile(credential.user, { displayName: data.nome });
+                await credential.user.getIdToken(true);
+            }
             
             navigate("/login");
         } catch (error) {
@@ -35,7 +32,7 @@ export function SignupForm() {
     }
 
     return (
-        <div className="bg-gray-900 rounded-lg p-10 shadow-xl w-full max-w-md" data-cy="signup-card">
+        <div className="w-full max-w-md rounded-lg bg-gray-900 p-5 shadow-xl xs:p-6 md:p-10" data-cy="signup-card">
 
             <form className="space-y-5" onSubmit={handleSubmit(handleSignup)} data-cy="signup-form">
                 <header className="mb-6">

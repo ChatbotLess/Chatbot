@@ -1,9 +1,14 @@
 from apps.chat.models import Mensagem, Chat
+from apps.base_conhecimento.models import Base_Conhecimento
 from .models import ChunkDocumento, MensagemChunk
 from apps.rag.rag import Rag
+from apps.rag.langsmith_tracing import traceable
 
 from pathlib import Path
+import os
+import requests
 import time
+from django.db import DatabaseError
 
 if not hasattr(time, "clock"):
     time.clock = time.perf_counter
@@ -20,12 +25,63 @@ warnings.filterwarnings("ignore", category=SyntaxWarning)
 
 
 AIML_PATH = Path(__file__).resolve().parent / "perguntas_frequentes.aiml"
+CLASSIFICADOR_URL = os.getenv("CLASSIFICADOR_URL", "http://127.0.0.1:8001/classificar")
+CLASSIFICADOR_TIMEOUT = float(os.getenv("CLASSIFICADOR_TIMEOUT", "5"))
+CLASSIFICADOR_CONFIANCA_MINIMA = float(os.getenv("CLASSIFICADOR_CONFIANCA_MINIMA", "0.70"))
 
 MENSAGEM_SEM_DOCS = (
     "Ainda não há documentos indexados na base de conhecimento. "
     "Por favor, envie um documento antes de fazer perguntas."
 )
 
+def _join_stream_chunks(chunks):
+    return {"texto": "".join(str(chunk) for chunk in chunks)}
+
+
+def _omit_stream_input(inputs):
+    return {key: value for key, value in inputs.items() if key != "stream"}
+
+
+def _mensagem_output(mensagem):
+    return {
+        "mensagem_id": getattr(mensagem, "id", None),
+        "role": getattr(mensagem, "role", None),
+    }
+
+
+def _rag_output(_rag_instance):
+    return {"status": "rag_inicializado"}
+
+
+@traceable(name="Classificar intenção", run_type="tool")
+def classificar_intencao(pergunta_usuario):
+    try:
+        response = requests.post(
+            CLASSIFICADOR_URL,
+            headers={
+                "accept": "application/json",
+                "Content-Type": "application/json",
+            },
+            json={"texto": pergunta_usuario},
+            timeout=CLASSIFICADOR_TIMEOUT,
+        )
+        response.raise_for_status()
+        payload = response.json()
+    except (requests.RequestException, ValueError, TypeError):
+        return None
+
+    classificacao = payload.get("classificacao")
+    
+    if not classificacao:
+        return None
+
+    return {
+        "classificacao": str(classificacao).strip().upper(),
+        "confianca": payload.get("confianca"),
+    }
+
+
+@traceable(name="Salvar mensagem", run_type="tool", process_outputs=_mensagem_output)
 def salvar_mensagem(chat_id, role, conteudo, pergunta_original=None, intencao=None, source_nodes=None):
     mensagem = Mensagem(
         chat_id=chat_id,
@@ -39,6 +95,7 @@ def salvar_mensagem(chat_id, role, conteudo, pergunta_original=None, intencao=No
     return mensagem
 
 
+@traceable(name="Salvar metadados dos chunks", run_type="tool")
 def salvar_metadados(mensagem, procura_nodes):
     for node in procura_nodes:
         node_id = node.node.node_id
@@ -54,6 +111,7 @@ def salvar_metadados(mensagem, procura_nodes):
             )
 
 
+@traceable(name="Inicializar RAG", run_type="tool", process_outputs=_rag_output)
 def inicializar_rag():
     rag_instance = Rag()
     rag_instance.carregar_llm()
@@ -76,6 +134,7 @@ class AimlService:
         return cls.kernel
 
     @classmethod
+    @traceable(name="Responder com AIML", run_type="tool")
     def responder(cls, pergunta_usuario):
         kernel = cls.carregar_kernel()
         if kernel is None:
@@ -99,14 +158,11 @@ class AimlResposta:
         self.resposta = resposta
 
     def stream(self):
-        salvar_mensagem(
+        yield from stream_resposta_aiml(
+            pergunta_usuario=self.pergunta_usuario,
             chat_id=self.chat_id,
-            role="assistant",
-            conteudo=self.resposta,
-            pergunta_original=self.pergunta_usuario,
+            resposta=self.resposta,
         )
-
-        yield self.resposta
 
 
 class RagResposta:
@@ -115,30 +171,10 @@ class RagResposta:
         self.chat_id = chat_id
 
     def stream(self):
-        yield ""  
-
-        rag_instance = inicializar_rag()
-        chat_engine = rag_instance.criar_chat_engine(self.chat_id)
-
-        response = chat_engine.stream_chat(self.pergunta_usuario)
-
-        texto_completo = ""
-
-        try:
-            for text in response.response_gen:
-                texto_completo += text
-                yield text
-
-        finally:
-            if texto_completo:
-                resposta = salvar_mensagem(
-                    chat_id=self.chat_id,
-                    role="assistant",
-                    conteudo=texto_completo,
-                    pergunta_original=self.pergunta_usuario,
-                )
-
-                salvar_metadados(resposta, response.source_nodes)
+        yield from stream_resposta_rag(
+            pergunta_usuario=self.pergunta_usuario,
+            chat_id=self.chat_id,
+        )
 
 
 class AimlCreator:
@@ -160,6 +196,81 @@ class RagCreator:
             pergunta_usuario=pergunta_usuario,
             chat_id=chat_id
         )
+
+
+@traceable(name="Stream resposta AIML", run_type="chain", reduce_fn=_join_stream_chunks)
+def stream_resposta_aiml(pergunta_usuario, chat_id, resposta):
+    salvar_mensagem(
+        chat_id=chat_id,
+        role="assistant",
+        conteudo=resposta,
+        pergunta_original=pergunta_usuario,
+    )
+
+    yield resposta
+
+
+@traceable(name="Stream resposta RAG", run_type="chain", reduce_fn=_join_stream_chunks)
+def stream_resposta_rag(pergunta_usuario, chat_id):
+    yield ""
+
+    rag_instance = inicializar_rag()
+    intencao = classificar_intencao(pergunta_usuario)
+    tipo_documento = None
+
+    if intencao and float(intencao.get("confianca") or 0) > CLASSIFICADOR_CONFIANCA_MINIMA:
+        tipo_documento = intencao["classificacao"]
+    try:
+        base = Base_Conhecimento.objects.filter(status='ATIVO').first()
+    except DatabaseError:
+        base = None
+
+    base_id = base.id if base else None
+    chat_engine = rag_instance.criar_chat_engine(chat_id, base_id, tipo_documento)
+    response = chat_engine.stream_chat(pergunta_usuario)
+
+    texto_completo = ""
+
+    try:
+        for text in response.response_gen:
+            texto_completo += text
+            yield text
+
+    finally:
+        if texto_completo:
+            resposta = salvar_mensagem(
+                chat_id=chat_id,
+                role="assistant",
+                conteudo=texto_completo,
+                pergunta_original=pergunta_usuario,
+                intencao=tipo_documento,
+            )
+
+            salvar_metadados(resposta, response.source_nodes)
+
+
+@traceable(name="Stream sem documentos", run_type="chain", reduce_fn=_join_stream_chunks)
+def stream_sem_documentos(pergunta_usuario, chat_id):
+    salvar_mensagem(
+        chat_id=chat_id,
+        role="assistant",
+        conteudo=MENSAGEM_SEM_DOCS,
+        pergunta_original=pergunta_usuario,
+        intencao="sem_documentos"
+    )
+
+    yield MENSAGEM_SEM_DOCS
+
+
+@traceable(
+    name="Stream resposta do chatbot",
+    run_type="chain",
+    process_inputs=_omit_stream_input,
+    reduce_fn=_join_stream_chunks,
+)
+def trace_stream_resposta(usuario_id, chat_id, pergunta_usuario, stream):
+    for chunk in stream:
+        yield chunk
 
 
 class RespostaResolver:
@@ -210,18 +321,7 @@ def fazer_pergunta(pergunta_usuario, chat_id=None, usuario_id=None):
     sem_documentos = not ChunkDocumento.objects.exists()
 
     if sem_documentos:
-        def stream_sem_documentos():
-            salvar_mensagem(
-                chat_id=chat_id,
-                role="assistant",
-                conteudo=MENSAGEM_SEM_DOCS,
-                pergunta_original=pergunta_usuario,
-                intencao="sem_documentos"
-            )
-
-            yield MENSAGEM_SEM_DOCS
-
-        return chat_id, stream_sem_documentos()
+        return chat_id, stream_sem_documentos(pergunta_usuario, chat_id)
 
     factory = RespostaResolver()
 
@@ -240,10 +340,13 @@ def responder_mensagem(userid, chat_id=None, pergunta=""):
         usuario_id=userid
     )
 
+    stream = trace_stream_resposta(userid, chat_id, pergunta, stream)
+
     return chat_id, stream
 
 
-def indexar_documento_no_rag(caminho: str, tipo: str, data):
+@traceable(name="Indexar documento no RAG", run_type="chain")
+def indexar_documento_no_rag(caminho: str, tipo: str, data, baseid):
     rag_instance = Rag()
     rag_instance.carregar_llm()
-    rag_instance.indexar_documento(caminho, tipo, data)
+    rag_instance.indexar_documento(caminho, tipo, data, baseid)

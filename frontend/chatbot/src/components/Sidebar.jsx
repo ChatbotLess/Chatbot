@@ -1,47 +1,53 @@
 import { useContext } from "react";
-import {
-  FaChartBar,
-  FaDatabase,
-  FaEllipsisV,
-  FaFileUpload,
-  FaPlus,
-  FaUser,
-} from "react-icons/fa";
+import { FaChartBar, FaDatabase, FaEllipsisV, FaFileUpload, FaPlus, FaUser } from "react-icons/fa";
 import { MdLogout, MdOutlineMessage } from "react-icons/md";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { AuthContext } from "../context/AuthProvider/AuthProvider";
 import { useChatData } from "../hooks/useChatData";
 
-export function Sidebar() {
-  const { logOut, user } = useContext(AuthContext);
+export function Sidebar({ onNavigate }) {
+  const { logOut, user, profile } = useContext(AuthContext);
   const { data, isError, isLoading } = useChatData(!!user);
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
-  const userName = user?.displayName || user?.email?.split("@")[0] || "Usuario";
-  const getNavButtonClass = (path) =>
-    `flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition ${
-      location.pathname === path
-        ? "bg-blue-600/20 text-white ring-1 ring-blue-500/40"
-        : "hover:bg-gray-800 hover:text-white"
-    }`;
-  const getNavIconClass = (path) =>
-    `shrink-0 ${location.pathname === path ? "text-blue-300" : "text-gray-400"}`;
+  const userName = profile?.name || user?.displayName || user?.email?.split("@")[0] || "Usuario";
 
   const handleLogout = async () => {
     try {
+      await queryClient.cancelQueries();
+      queryClient.clear();
       await logOut();
+      onNavigate?.();
       navigate("/login");
     } catch (error) {
       console.error(error);
     }
   };
 
+  const handleNavigate = (path) => {
+    navigate(path);
+    onNavigate?.();
+  };
+
   return (
-    <aside className="flex h-screen w-[min(18rem,85vw)] shrink-0 flex-col overflow-hidden rounded-r-lg border-r border-gray-800 bg-gray-900 px-3 py-4 text-gray-200 shadow-xl shadow-black/20" data-cy="sidebar">
+    <aside
+      className="flex h-full w-[min(18rem,86vw)] shrink-0 flex-col overflow-hidden rounded-r-lg border-r border-gray-800 bg-gray-900 px-3 py-4 text-gray-200 shadow-xl shadow-black/20 md:h-[100dvh]"
+      data-cy="sidebar"
+    >
       <div className="shrink-0">
         <header
-          className="mb-6 flex cursor-pointer items-center gap-2 px-1 transition hover:opacity-80"
-          onClick={() => navigate("/")}
+          className="mb-6 flex cursor-pointer items-center gap-2 rounded-md px-1 py-1 transition hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+          onClick={() => handleNavigate("/")}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              handleNavigate("/");
+            }
+          }}
+          role="button"
+          tabIndex={0}
         >
           <MdOutlineMessage className="text-2xl text-white" />
           <h1 className="text-2xl font-bold text-white">Chatbot</h1>
@@ -49,40 +55,44 @@ export function Sidebar() {
 
         <nav className="flex flex-col gap-1">
           <button
-            className={getNavButtonClass("/")}
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
             data-cy="sidebar-new-chat"
-            onClick={() => navigate("/")}
+            onClick={() => handleNavigate("/")}
           >
-            <FaPlus className={getNavIconClass("/")} />
+            <FaPlus className="shrink-0 text-gray-400" />
             Nova Conversa
           </button>
 
-          <button
-            className={getNavButtonClass("/upload")}
-            data-cy="sidebar-upload"
-            onClick={() => navigate("/upload")}
-          >
-            <FaFileUpload className={getNavIconClass("/upload")} />
-            Inserir Documentos
-          </button>
+          {profile?.is_staff && (
+            <>
+              <button
+                className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                data-cy="sidebar-upload"
+                onClick={() => handleNavigate("/upload")}
+              >
+                <FaFileUpload className="shrink-0 text-gray-400" />
+                Inserir Documentos
+              </button>
 
-          <button
-            className={getNavButtonClass("/base-conhecimento")}
-            data-cy="sidebar-knowledge-base"
-            onClick={() => navigate("/base-conhecimento")}
-          >
-            <FaDatabase className={getNavIconClass("/base-conhecimento")} />
-            Base de Conhecimento
-          </button>
+              <button
+                className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                data-cy="sidebar-dashboard"
+                onClick={() => handleNavigate("/dashboard")}
+              >
+                <FaChartBar className="shrink-0 text-gray-400" />
+                Dashboard
+              </button>
 
-          <button
-            className={getNavButtonClass("/dashboard")}
-            data-cy="sidebar-dashboard"
-            onClick={() => navigate("/dashboard")}
-          >
-            <FaChartBar className={getNavIconClass("/dashboard")} />
-            Dashboard
-          </button>
+              <button
+                className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                data-cy="sidebar-knowledge-base"
+                onClick={() => handleNavigate("/knowledge")}
+              >
+                <FaDatabase className="shrink-0 text-gray-400" />
+                Bases de Conhecimento
+              </button>
+            </>
+          )}
         </nav>
       </div>
 
@@ -122,13 +132,14 @@ export function Sidebar() {
             return (
               <button
                 key={chat.id}
-                data-cy="chat-history-item"
                 className={`group flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition ${
                   isActive
                     ? "bg-blue-600/20 text-white ring-1 ring-blue-500/40"
                     : "text-gray-300 hover:bg-gray-800 hover:text-white"
                 }`}
-                onClick={() => navigate(`/chat/${chat.id}`)}
+                data-cy="chat-history-item"
+                onClick={() => handleNavigate(`/chat/${chat.id}`)}
+                aria-current={isActive ? "page" : undefined}
               >
                 <MdOutlineMessage
                   className={`shrink-0 ${
@@ -152,13 +163,13 @@ export function Sidebar() {
           <span className="truncate font-medium uppercase text-white">{userName}</span>
 
           <span className="text-sm text-gray-400">
-            (ADMIN) {/* CARGO DO BANCO */}
+            {profile?.is_staff ? "Admin" : "Usuario"}
           </span>
         </div>
 
         <button
           onClick={handleLogout}
-          className="cursor-pointer rounded-md p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white"
+          className="cursor-pointer rounded-md p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
           data-cy="logout-button"
           title="Sair"
           type="button"

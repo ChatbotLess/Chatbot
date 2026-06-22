@@ -2,7 +2,6 @@ from ninja import Router
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from ninja.errors import HttpError
-from apps.user.models import User
 from apps.chat.models import Chat, Mensagem, Feedback
 from apps.chat.schemas import MensagemSchemaOut
 from .schemas import ChatSchema, FeedbackSchemaIn, FeedbackSchemaOut
@@ -11,36 +10,31 @@ router = Router()
 
 
 @router.get("/listarchats", response=list[ChatSchema], tags=["Chat"])
-def listar_chats(request, user_id: str):
-    usuario = get_object_or_404(User, id=user_id)
-    return usuario.chats.order_by("-data", "-id")
+def listar_chats(request):
+    return request.auth.chats.order_by("-data", "-id")
 
 @router.get("/listarmensagem", response=list[MensagemSchemaOut], tags=["Chat"])
-def listar_mensagem(request, userid: str, chatID: str):
-    usuario = get_object_or_404(User, id=userid)
-    chat = get_object_or_404(Chat, id=chatID, usuario=usuario)
+def listar_mensagem(request, chatID: str):
+    chat = get_object_or_404(Chat, id=chatID, usuario=request.auth)
     mensagens = chat.mensagens.order_by("id")
     return mensagens
 
 @router.post("/chat/", response=ChatSchema, tags=["Chat"])
-def chat(request, data: ChatSchema, user_id: str):
-    user = get_object_or_404(User, id=user_id)
-    chat = Chat(titulo = data.titulo, usuario = user)
+def chat(request, data: ChatSchema):
+    chat = Chat(titulo = data.titulo, usuario = request.auth)
     chat.save()
     return chat
 
 
 @router.get("/listarfeedback", response=list[FeedbackSchemaOut], tags=["Feedback"])
-def listar_feedback(request, userid: str, chatID: str):
-    usuario = get_object_or_404(User, id=userid)
-    chat = get_object_or_404(Chat, id=chatID, usuario=usuario)
+def listar_feedback(request, chatID: str):
+    chat = get_object_or_404(Chat, id=chatID, usuario=request.auth)
     return Feedback.objects.filter(mensagem__chat=chat).select_related("mensagem")
 
 
 @router.post("/feedback", response=FeedbackSchemaOut, tags=["Feedback"])
-def feedback(request, userid: str, chatID: str, mensagemID: str, tipo: str, mensagem_feedback: str = ""):
-    usuario = get_object_or_404(User, id=userid)
-    chat = get_object_or_404(Chat, id=chatID, usuario=usuario)
+def feedback(request, chatID: str, mensagemID: str, tipo: str, mensagem_feedback: str = ""):
+    chat = get_object_or_404(Chat, id=chatID, usuario=request.auth)
     mensagem = get_object_or_404(Mensagem, id=mensagemID, chat=chat)
 
     feedback_tipo = tipo.strip().upper()
@@ -66,7 +60,11 @@ def feedback(request, userid: str, chatID: str, mensagemID: str, tipo: str, mens
 
 @router.post("/mensagens/{mensagem_id}/feedback", response=FeedbackSchemaOut, tags=["Feedback"])
 def registrar_feedback(request, mensagem_id: str, data: FeedbackSchemaIn):
-    mensagem = get_object_or_404(Mensagem, id=mensagem_id)
+    mensagem = get_object_or_404(
+        Mensagem.objects.select_related("chat"),
+        id=mensagem_id,
+        chat__usuario=request.auth,
+    )
 
     tipo = data.tipo.strip().upper()
     mensagem_feedback = data.mensagem_feedback or ""

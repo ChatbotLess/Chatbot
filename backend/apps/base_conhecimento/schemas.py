@@ -14,5 +14,10 @@ class BaseConhecimentoIn(ModelSchema):
        model = Base_Conhecimento
        fields = ['id','titulo','descricao','versao']
 
+class BaseConhecimentoOut(ModelSchema):    
+    class Meta:
+        model = Base_Conhecimento
+        fields = "__all__"
+
 class ErroSchema(Schema):
     erro: list[str]

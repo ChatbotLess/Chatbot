@@ -1,183 +1,170 @@
 import { useRef, useState } from "react";
-import {
-  FaCheckCircle,
-  FaExclamationTriangle,
-  FaFilePdf,
-  FaSpinner,
-  FaTrashAlt,
-  FaUpload,
-} from "react-icons/fa";
-import {
-  useBackendUser,
-  useKnowledgeBases,
-  useUploadDocuments,
-} from "../../hooks/useKnowledgeBaseDocuments";
+import { FaFilePdf, FaTrashAlt, FaUpload, FaCloudUploadAlt, FaCheckCircle, FaExclamationTriangle, FaSpinner } from "react-icons/fa";
+import { useKnowledgeBases } from "../../hooks/useKnowledgeBase";
+import { useUploadDocument } from "../../hooks/useUploadDocument";
 
-const DOCUMENT_TYPES = [
+const TIPOS_DOCUMENTO = [
   { value: "PORTARIA", label: "Portaria" },
-  { value: "RESOLUCAO", label: "Resolucao" },
-  { value: "ROD", label: "ROD" },
+  { value: "RESOLUCAO", label: "Resolução" },
+  { value: "ROD", label: "Rod" },
 ];
-
-function getErrorMessage(error) {
-  const backendMessage = error?.response?.data?.detail ?? error?.response?.data?.erro;
-
-  if (Array.isArray(backendMessage)) {
-    return backendMessage.join(", ");
-  }
-
-  if (typeof backendMessage === "string") {
-    return backendMessage;
-  }
-
-  if (backendMessage && typeof backendMessage === "object") {
-    return Object.values(backendMessage).flat().join(", ");
-  }
-
-  return error?.message || "Nao foi possivel enviar os documentos.";
-}
 
 export function UploadArea() {
   const inputRef = useRef(null);
-  const [documents, setDocuments] = useState([]);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [submitError, setSubmitError] = useState("");
-  const [isPreparingUpload, setIsPreparingUpload] = useState(false);
-  const backendUserQuery = useBackendUser(false);
-  const knowledgeBasesQuery = useKnowledgeBases(false);
-  const uploadDocumentsMutation = useUploadDocuments();
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedBaseId, setSelectedBaseId] = useState("");
+  const [selectedTipo, setSelectedTipo] = useState("");
 
-  const handleFilesSelected = (event) => {
-    const selectedFiles = Array.from(event.target.files || []).filter(
-      (file) => file.type === "application/pdf"
-    );
+  const {
+    data: bases = [],
+    isError: isErrorBases,
+    isLoading: isLoadingBases,
+  } = useKnowledgeBases();
+  const uploadMutation = useUploadDocument();
 
-    setSuccessMessage("");
-    setSubmitError("");
-    setDocuments((currentDocuments) => {
-      const existingKeys = new Set(
-        currentDocuments.map((document) => `${document.name}-${document.size}`)
-      );
-
-      const newDocuments = selectedFiles
-        .filter((file) => !existingKeys.has(`${file.name}-${file.size}`))
-        .map((file) => ({
-          id: `${file.name}-${file.size}-${file.lastModified}`,
-          name: file.name,
-          size: file.size,
-          tipo: DOCUMENT_TYPES[0].value,
-          file,
-        }));
-
-      return [...currentDocuments, ...newDocuments];
-    });
-
+  const handleFileSelected = (event) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === "application/pdf") {
+      setSelectedFile(file);
+      uploadMutation.reset();
+    }
     event.target.value = "";
   };
 
-  const handleRemoveDocument = (documentId) => {
-    setDocuments((currentDocuments) =>
-      currentDocuments.filter((document) => document.id !== documentId)
-    );
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    uploadMutation.reset();
   };
 
-  const handleDocumentTypeChange = (documentId, tipo) => {
-    setDocuments((currentDocuments) =>
-      currentDocuments.map((document) =>
-        document.id === documentId ? { ...document, tipo } : document
-      )
+  const handleUpload = () => {
+    if (!selectedFile || !selectedBaseId || !selectedTipo) return;
+
+    uploadMutation.mutate(
+      { file: selectedFile, baseId: selectedBaseId, tipo: selectedTipo },
+      {
+        onSuccess: () => {
+          setSelectedFile(null);
+        },
+      }
     );
-  };
-
-  const handleSubmitDocuments = async () => {
-    if (documents.length === 0) {
-      return;
-    }
-
-    setSuccessMessage("");
-    setSubmitError("");
-    setIsPreparingUpload(true);
-
-    try {
-      const [backendUserResult, knowledgeBasesResult] = await Promise.all([
-        backendUserQuery.refetch(),
-        knowledgeBasesQuery.refetch(),
-      ]);
-
-      if (backendUserResult.isError) {
-        throw new Error("Nao foi possivel carregar o usuario do backend.");
-      }
-
-      if (knowledgeBasesResult.isError) {
-        throw new Error("Nao foi possivel carregar a base para envio.");
-      }
-
-      const backendUser = backendUserResult.data;
-      const base = knowledgeBasesResult.data?.[0];
-
-      if (!backendUser?.id) {
-        throw new Error("Usuario autenticado nao encontrado no backend.");
-      }
-
-      if (!base?.id) {
-        throw new Error("Nenhuma base cadastrada para receber os documentos.");
-      }
-
-      await uploadDocumentsMutation.mutateAsync({
-        baseId: base.id,
-        userId: backendUser.id,
-        documents,
-      });
-      setDocuments([]);
-      setSuccessMessage("Documentos enviados com sucesso.");
-    } catch (error) {
-      console.error(error);
-      setSubmitError(getErrorMessage(error));
-    } finally {
-      setIsPreparingUpload(false);
-    }
   };
 
   const formatFileSize = (sizeInBytes) => {
     const sizeInMb = sizeInBytes / (1024 * 1024);
+    if (sizeInMb < 0.01) {
+      const sizeInKb = sizeInBytes / 1024;
+      return `${sizeInKb.toFixed(1)} KB`;
+    }
     return `${sizeInMb.toFixed(2)} MB`;
   };
 
-  const canSubmit =
-    documents.length > 0 && !isPreparingUpload && !uploadDocumentsMutation.isPending;
+  const isFormReady = selectedFile && selectedBaseId && selectedTipo;
+  const isBaseSelectDisabled = isLoadingBases || isErrorBases || bases.length === 0;
 
   return (
     <div className="space-y-6" data-cy="upload-area">
-      <section className="rounded-xl border border-gray-800 bg-gray-900 p-6 shadow-sm">
+      <section className="rounded-xl border border-gray-800 bg-gray-900 p-4 shadow-sm xs:p-5 md:p-6">
+        <h2 className="text-lg font-semibold text-white xs:text-xl">Configurações do envio</h2>
+        <p className="mt-2 max-w-2xl text-sm text-gray-400">
+          Selecione a base de conhecimento e o tipo de documento antes de enviar o arquivo.
+        </p>
+
+        <div className="mt-5 grid gap-5 md:mt-6 md:grid-cols-2">
+          <div>
+            <label htmlFor="base-select" className="mb-2 block text-sm font-medium text-gray-300">
+              Base de conhecimento
+            </label>
+            <select
+              id="base-select"
+              value={selectedBaseId}
+              onChange={(e) => setSelectedBaseId(e.target.value)}
+              disabled={isBaseSelectDisabled}
+              data-cy="base-select"
+              className="w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-sm text-white transition focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:opacity-50"
+            >
+              <option value="">
+                {isLoadingBases
+                  ? "Carregando bases..."
+                  : isErrorBases
+                    ? "Erro ao carregar bases"
+                    : bases.length === 0
+                      ? "Nenhuma base disponivel"
+                      : "Selecione uma base"}
+              </option>
+              {bases.map((base) => (
+                <option key={base.id} value={base.id}>
+                  {base.titulo} - v{base.versao}
+                  {base.status === "ATIVO" ? " (Ativa)" : ""}
+                </option>
+              ))}
+            </select>
+            {!isLoadingBases && !isErrorBases && bases.length === 0 && (
+              <p className="mt-2 text-xs text-amber-300/80">
+                Cadastre uma base de conhecimento antes de enviar documentos.
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="tipo-select" className="mb-2 block text-sm font-medium text-gray-300">
+              Tipo de documento
+            </label>
+            <select
+              id="tipo-select"
+              value={selectedTipo}
+              onChange={(e) => setSelectedTipo(e.target.value)}
+              data-cy="document-type-select"
+              className="w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-sm text-white transition focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+            >
+              <option value="">Selecione o tipo</option>
+              {TIPOS_DOCUMENTO.map((tipo) => (
+                <option key={tipo.value} value={tipo.value}>
+                  {tipo.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-gray-800 bg-gray-900 p-4 shadow-sm xs:p-5 md:p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-white">Inserir documentos</h2>
+            <h2 className="text-lg font-semibold text-white xs:text-xl">Inserir documento</h2>
             <p className="mt-2 max-w-2xl text-sm text-gray-400">
-              Adicione arquivos PDF para compor a base de conhecimento utilizada pelo
-              chatbot.
+              Adicione um arquivo PDF para compor a base de conhecimento utilizada pelo chatbot.
             </p>
           </div>
 
-          <div className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-300" data-cy="selected-documents-count">
-            {documents.length} {documents.length === 1 ? "documento" : "documentos"} selecionados
+          <div
+            className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-300"
+            data-cy="selected-documents-count"
+          >
+            {selectedFile ? "1 documento selecionado" : "0 documentos selecionados"}
           </div>
         </div>
 
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          disabled={uploadDocumentsMutation.isPending}
+          disabled={!!selectedFile}
           data-cy="file-select-button"
-          className="mt-6 flex w-full flex-col items-center justify-center rounded-xl border border-dashed border-gray-700 bg-gray-950/80 px-6 py-12 text-center transition hover:border-sky-500/50 hover:bg-gray-950"
+          className={`mt-6 flex w-full flex-col items-center justify-center rounded-xl border border-dashed px-4 py-10 text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 xs:px-6 md:py-12 ${
+            selectedFile
+              ? "cursor-not-allowed border-gray-800 bg-gray-950/40 opacity-50"
+              : "border-gray-700 bg-gray-950/80 hover:border-sky-500/50 hover:bg-gray-950"
+          }`}
         >
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-sky-500/10 text-sky-400">
             <FaUpload className="text-xl" />
           </span>
-          <span className="mt-5 text-lg font-medium text-white">
-            Clique para selecionar arquivos PDF
+          <span className="mt-5 text-base font-medium text-white xs:text-lg">
+            {selectedFile ? "Arquivo já selecionado" : "Clique para selecionar um arquivo PDF"}
           </span>
           <span className="mt-2 text-sm text-gray-400">
-            Voc&ecirc; pode adicionar m&uacute;ltiplos documentos e remov&ecirc;-los da lista abaixo.
+            {selectedFile
+              ? "Remova o arquivo atual para selecionar outro."
+              : "Somente um arquivo PDF por envio."}
           </span>
         </button>
 
@@ -185,122 +172,106 @@ export function UploadArea() {
           ref={inputRef}
           type="file"
           accept="application/pdf"
-          multiple
-          onChange={handleFilesSelected}
+          onChange={handleFileSelected}
           data-cy="file-input"
           className="hidden"
         />
       </section>
 
-      <section className="rounded-xl border border-gray-800 bg-gray-900 p-6 shadow-sm">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-white">Documentos inseridos</h3>
-            <p className="mt-1 text-sm text-gray-400">
-              Gerencie os arquivos carregados nesta sess&atilde;o.
-            </p>
-          </div>
+      {selectedFile ? (
+        <section className="rounded-xl border border-gray-800 bg-gray-900 p-4 shadow-sm xs:p-5 md:p-6">
+          <h3 className="text-lg font-semibold text-white">Documento selecionado</h3>
+          <p className="mt-1 text-sm text-gray-400">
+            Confira o arquivo antes de enviá-lo.
+          </p>
 
-          <button
-            type="button"
-            onClick={handleSubmitDocuments}
-            disabled={!canSubmit}
-            data-cy="upload-submit"
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:bg-gray-700 disabled:text-gray-400"
+          <div
+            className="mt-5 flex flex-col gap-4 rounded-xl border border-gray-800 bg-gray-950/70 px-4 py-4 md:flex-row md:items-center md:justify-between"
+            data-cy="selected-document"
           >
-            {isPreparingUpload || uploadDocumentsMutation.isPending ? (
-              <FaSpinner className="animate-spin" />
-            ) : (
-              <FaUpload />
-            )}
-            {isPreparingUpload || uploadDocumentsMutation.isPending
-              ? "Enviando..."
-              : "Enviar documentos"}
-          </button>
+            <div className="flex min-w-0 items-center gap-4">
+              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-rose-500/10 text-rose-400">
+                <FaFilePdf className="text-lg" />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate font-medium text-white">{selectedFile.name}</p>
+                <p className="mt-1 text-sm text-gray-400">
+                  {formatFileSize(selectedFile.size)}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleRemoveFile}
+              disabled={uploadMutation.isPending}
+              data-cy="remove-document"
+              className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-300 transition hover:border-rose-500/40 hover:bg-rose-500/10 hover:text-rose-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/60 disabled:cursor-not-allowed disabled:opacity-50 md:self-auto"
+            >
+              <FaTrashAlt />
+              Remover
+            </button>
+          </div>
+        </section>
+      ) : (
+        <div
+          className="rounded-xl border border-dashed border-gray-800 bg-gray-950/60 px-4 py-10 text-center text-sm text-gray-500"
+          data-cy="upload-empty-state"
+        >
+          Nenhum documento PDF foi inserido ainda.
         </div>
+      )}
 
-        {submitError && (
-          <div className="mt-6 flex items-center gap-3 rounded-lg border border-red-900/60 bg-red-950/30 px-4 py-3 text-sm text-red-200" data-cy="upload-error">
-            <FaExclamationTriangle className="shrink-0" />
-            {submitError}
-          </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+        <button
+          type="button"
+          onClick={handleUpload}
+          disabled={!isFormReady || uploadMutation.isPending}
+          data-cy="upload-submit"
+          className={`inline-flex w-full items-center justify-center gap-3 rounded-xl px-6 py-3.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 sm:w-auto sm:px-8 ${
+            isFormReady && !uploadMutation.isPending
+              ? "bg-sky-600 text-white shadow-lg shadow-sky-600/20 hover:bg-sky-500"
+              : "cursor-not-allowed bg-gray-800 text-gray-500"
+          }`}
+        >
+          {uploadMutation.isPending ? (
+            <>
+              <FaSpinner className="animate-spin" />
+              Enviando...
+            </>
+          ) : (
+            <>
+              <FaCloudUploadAlt className="text-lg" />
+              Enviar documento
+            </>
+          )}
+        </button>
+
+        {uploadMutation.isSuccess && (
+          <span className="inline-flex items-center gap-2 text-sm font-medium text-emerald-400" data-cy="upload-success">
+            <FaCheckCircle />
+            Documento enviado com sucesso!
+          </span>
         )}
 
-        {uploadDocumentsMutation.isError && !submitError && (
-          <div className="mt-6 flex items-center gap-3 rounded-lg border border-red-900/60 bg-red-950/30 px-4 py-3 text-sm text-red-200" data-cy="upload-error">
-            <FaExclamationTriangle className="shrink-0" />
-            Nao foi possivel enviar os documentos.
-          </div>
+        {uploadMutation.isError && (
+          <span className="inline-flex items-start gap-2 text-sm font-medium text-rose-400" data-cy="upload-error">
+            <FaExclamationTriangle />
+            Erro ao enviar: {uploadMutation.error?.response?.data?.erro || uploadMutation.error?.message}
+          </span>
         )}
+      </div>
 
-        {successMessage && (
-          <div className="mt-6 flex items-center gap-3 rounded-lg border border-emerald-900/60 bg-emerald-950/30 px-4 py-3 text-sm text-emerald-200" data-cy="upload-success">
-            <FaCheckCircle className="shrink-0" />
-            {successMessage}
-          </div>
-        )}
-
-        {documents.length === 0 ? (
-          <div className="mt-6 rounded-xl border border-dashed border-gray-800 bg-gray-950/60 px-4 py-10 text-center text-sm text-gray-500" data-cy="upload-empty-state">
-            Nenhum documento PDF foi inserido ainda.
-          </div>
-        ) : (
-          <ul className="mt-6 space-y-3">
-            {documents.map((document) => (
-              <li
-                key={document.id}
-                data-cy="selected-document"
-                className="flex flex-col gap-4 rounded-xl border border-gray-800 bg-gray-950/70 px-4 py-4 md:flex-row md:items-center md:justify-between"
-              >
-                <div className="flex items-center gap-4">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-rose-500/10 text-rose-400">
-                    <FaFilePdf className="text-lg" />
-                  </span>
-
-                  <div>
-                    <p className="font-medium text-white">{document.name}</p>
-                    <p className="mt-1 text-sm text-gray-400">
-                      {formatFileSize(document.size)}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-3 md:flex-row md:items-center">
-                  <label className="flex flex-col gap-1 text-sm text-gray-400">
-                    Tipo
-                    <select
-                      value={document.tipo}
-                      onChange={(event) =>
-                        handleDocumentTypeChange(document.id, event.target.value)
-                      }
-                      disabled={isPreparingUpload || uploadDocumentsMutation.isPending}
-                      data-cy="document-type-select"
-                      className="min-w-36 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-200 outline-none transition focus:border-sky-500 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {DOCUMENT_TYPES.map((type) => (
-                        <option key={type.value} value={type.value}>
-                          {type.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveDocument(document.id)}
-                    disabled={isPreparingUpload || uploadDocumentsMutation.isPending}
-                    data-cy="remove-document"
-                    className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-300 transition hover:border-rose-500/40 hover:bg-rose-500/10 hover:text-rose-300 disabled:cursor-not-allowed disabled:opacity-60 md:self-end"
-                  >
-                    <FaTrashAlt />
-                    Remover
-                  </button>
-                </div>
-              </li>
-            ))}
+      {!isFormReady && (selectedFile || selectedBaseId || selectedTipo) && (
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-300/80">
+          <p className="font-medium text-amber-300">Para enviar, preencha todos os campos:</p>
+          <ul className="mt-2 list-inside list-disc space-y-1">
+            {!selectedBaseId && <li>Selecione uma base de conhecimento</li>}
+            {!selectedTipo && <li>Selecione o tipo de documento</li>}
+            {!selectedFile && <li>Selecione um arquivo PDF</li>}
           </ul>
-        )}
-      </section>
+        </div>
+      )}
     </div>
   );
 }

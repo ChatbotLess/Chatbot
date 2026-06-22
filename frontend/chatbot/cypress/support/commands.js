@@ -11,6 +11,7 @@ const defaultBackendUser = {
   firebase_uid: defaultAuthUser.uid,
   email: defaultAuthUser.email,
   name: "Admin E2E",
+  is_staff: true,
 };
 
 Cypress.Commands.add("visitAsGuest", (path = "/login") => {
@@ -31,6 +32,7 @@ Cypress.Commands.add("visitAsUser", (path = "/", user = defaultAuthUser) => {
 
 Cypress.Commands.add("mockBackendUser", (backendUser = defaultBackendUser) => {
   cy.intercept("GET", "/api/users/", [backendUser]).as("getUsers");
+  cy.intercept("GET", "/api/users/me/", backendUser).as("getCurrentUser");
 });
 
 Cypress.Commands.add("mockChatHistory", (chats = []) => {

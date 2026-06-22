@@ -23,7 +23,7 @@ export function LoginForm() {
     };
 
     return (
-        <div className="bg-gray-900 rounded-lg p-10 shadow-xl w-full max-w-md" data-cy="login-card">
+        <div className="w-full max-w-md rounded-lg bg-gray-900 p-5 shadow-xl xs:p-6 md:p-10" data-cy="login-card">
 
             <form className="space-y-5" onSubmit={handleSubmit(handleLogin)} data-cy="login-form">
                 <header className="mb-6">
@@ -61,7 +61,14 @@ export function LoginForm() {
                 </div>
 
                 <div>
-                    <p className="cursor-pointer text-gray-200" data-cy="forgot-password-link" onClick={() => navigate('/reset')}>Esqueci minha senha</p>
+                    <button
+                        type="button"
+                        className="text-sm text-gray-200 underline-offset-4 transition hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                        data-cy="forgot-password-link"
+                        onClick={() => navigate('/reset')}
+                    >
+                        Esqueci minha senha
+                    </button>
                 </div>
 
                 <footer className="mt-6 space-y-5">

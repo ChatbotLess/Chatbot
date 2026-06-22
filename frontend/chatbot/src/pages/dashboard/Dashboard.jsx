@@ -40,9 +40,9 @@ const reformulatedQuestionPerformance = [
 
 function DashboardMetricCard({ label, value, change, helper, accent }) {
   return (
-    <article className="rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-sm">
+    <article className="rounded-xl border border-gray-800 bg-gray-900 p-4 shadow-sm transition hover:border-gray-700 xs:p-5">
       <p className="text-sm text-gray-400">{label}</p>
-      <p className="mt-3 text-3xl font-semibold text-white">{value}</p>
+      <p className="mt-3 text-2xl font-semibold text-white xs:text-3xl">{value}</p>
       <div className="mt-4 flex items-center justify-between">
         <span className={`text-sm font-medium ${accent}`}>{change}</span>
         <span className="text-xs text-gray-500">{helper}</span>
@@ -79,7 +79,7 @@ function ReformulatedQuestionsChart() {
   },${height - bottomPadding}`;
 
   return (
-    <section className="rounded-xl border border-gray-800 bg-gray-900 p-6 shadow-sm">
+    <section className="rounded-xl border border-gray-800 bg-gray-900 p-4 shadow-sm xs:p-5 md:p-6">
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-white">
           Desempenho de respostas reformuladas
@@ -92,7 +92,7 @@ function ReformulatedQuestionsChart() {
       <div className="overflow-x-auto">
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className="h-[320px] min-w-[700px] w-full"
+          className="h-[280px] min-w-[620px] w-full xs:h-[320px] xs:min-w-[700px]"
           role="img"
           aria-label="Grafico de desempenho mensal de perguntas reformuladas bem sucedidas"
         >
@@ -147,10 +147,10 @@ function ReformulatedQuestionsChart() {
 
 export function Dashboard() {
   return (
-    <div className="h-screen overflow-y-auto bg-gray-950 px-6 py-8 md:px-10">
+    <div className="h-full overflow-y-auto bg-gray-950 px-4 py-6 xs:px-5 md:px-10 md:py-8">
       <div className="mx-auto w-full max-w-6xl">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+        <header className="mb-6 md:mb-8">
+          <h1 className="text-2xl font-bold text-white md:text-3xl">Dashboard</h1>
           <p className="mt-2 text-sm text-gray-400">
             Acompanhamento geral das metricas da plataforma
           </p>

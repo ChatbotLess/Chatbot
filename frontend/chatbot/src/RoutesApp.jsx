@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { MdMenu, MdOutlineMessage } from 'react-icons/md';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 import { Chat } from './pages/chat/Chat';
@@ -13,17 +15,71 @@ import { NotFound } from './pages/NotFound';
 import { Sidebar } from './components/Sidebar';
 import PrivateRoute from './context/AuthProvider/privateRoute';
 import PublicRoute from './context/AuthProvider/publicRoute';
+import StaffRoute from './context/AuthProvider/staffRoute';
+
+function StaffPage({ children }) {
+  return (
+    <PrivateRoute>
+      <StaffRoute>
+        {children}
+      </StaffRoute>
+    </PrivateRoute>
+  );
+}
 
 function AppContent() {
   const location = useLocation();
-  const validRoutes = ['/', '/chat', '/dashboard', '/upload', '/base-conhecimento', '/login', '/signup'];
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const validRoutes = [
+    '/',
+    '/chat',
+    '/dashboard',
+    '/upload',
+    '/knowledge',
+    '/base-conhecimento',
+    '/login',
+    '/signup',
+  ];
   const isValidRoute = validRoutes.includes(location.pathname) || location.pathname.startsWith('/chat/');
-  const showSidebar = isValidRoute && !['/login', '/signup'].includes(location.pathname.toLowerCase()); 
+  const showSidebar = isValidRoute && !['/login', '/signup'].includes(location.pathname.toLowerCase());
 
   return (
-    <div className="flex h-[100vh] bg-gray-950">
-      {showSidebar && <Sidebar />}
-      <main className="flex-1">
+    <div className="flex h-[100dvh] overflow-hidden bg-gray-950">
+      {showSidebar && (
+        <>
+          <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-gray-800 bg-gray-950/95 px-4 text-white backdrop-blur md:hidden">
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(true)}
+              className="rounded-md p-2 text-gray-300 transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70"
+              aria-label="Abrir menu"
+            >
+              <MdMenu size={22} />
+            </button>
+            <MdOutlineMessage className="text-xl" />
+            <span className="text-sm font-semibold">Chatbot</span>
+          </header>
+
+          {isSidebarOpen && (
+            <button
+              type="button"
+              className="fixed inset-0 z-40 bg-black/60 md:hidden"
+              onClick={() => setIsSidebarOpen(false)}
+              aria-label="Fechar menu"
+            />
+          )}
+
+          <div
+            className={`fixed inset-y-0 left-0 z-50 transition-transform duration-200 md:static md:z-auto md:translate-x-0 ${
+              isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
+          >
+            <Sidebar onNavigate={() => setIsSidebarOpen(false)} />
+          </div>
+        </>
+      )}
+
+      <main className={`min-w-0 flex-1 ${showSidebar ? "h-full pt-14 md:pt-0" : "h-full"}`}>
         <Routes>
           <Route path='/' element={
             <PrivateRoute>
@@ -41,19 +97,24 @@ function AppContent() {
             </PrivateRoute>
           } />
           <Route path='/dashboard' element={
-            <PrivateRoute>
+            <StaffPage>
               <Dashboard />
-            </PrivateRoute>
+            </StaffPage>
           } />
           <Route path='/upload' element={
-            <PrivateRoute>
+            <StaffPage>
               <FileUpload />
-            </PrivateRoute>
+            </StaffPage>
+          } />
+          <Route path='/knowledge' element={
+            <StaffPage>
+              <KnowledgeBase />
+            </StaffPage>
           } />
           <Route path='/base-conhecimento' element={
-            <PrivateRoute>
+            <StaffPage>
               <KnowledgeBase />
-            </PrivateRoute>
+            </StaffPage>
           } />
           <Route path='/login' element={
             <PublicRoute>

@@ -4,7 +4,9 @@
       "id": 1,
       "titulo": "Base principal",
       "descricao": "Base usada nos testes E2E",
-      "versao": "1.0"
+      "versao": "1.0",
+      "status": "ATIVO",
+      "data_criacao": "2026-05-01T10:00:00.000Z"
     }
   ],
   "items": [

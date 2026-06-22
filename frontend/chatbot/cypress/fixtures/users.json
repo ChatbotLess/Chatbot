@@ -8,6 +8,7 @@
     "id": "backend-user-1",
     "firebase_uid": "e2e-auth-user",
     "email": "admin@example.com",
-    "name": "Admin E2E"
+    "name": "Admin E2E",
+    "is_staff": true
   }
 }

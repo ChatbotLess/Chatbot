@@ -6,63 +6,71 @@ describe("base de conhecimento", () => {
     });
   });
 
-  it("mostra estado vazio quando nao ha documentos", () => {
+  it("mostra estado vazio quando nao ha bases", () => {
     cy.fixture("users").then(({ authUser }) => {
-      cy.intercept("GET", "/api/base_conhecimento/listardocumentos", []).as(
-        "listDocuments"
+      cy.intercept("GET", "/api/base_conhecimento/listarbase", []).as(
+        "listKnowledgeBases"
       );
 
-      cy.visitAsUser("/base-conhecimento", authUser);
-      cy.wait("@listDocuments");
+      cy.visitAsUser("/knowledge", authUser);
+      cy.wait("@listKnowledgeBases");
 
       cy.get("[data-cy=knowledge-empty-state]").should(
         "contain",
-        "Nenhum documento persistido foi encontrado."
+        "Nenhuma base de conhecimento cadastrada"
       );
     });
   });
 
-  it("mostra erro quando documentos nao carregam", () => {
+  it("mostra erro quando bases nao carregam", () => {
     cy.fixture("users").then(({ authUser }) => {
-      cy.intercept("GET", "/api/base_conhecimento/listardocumentos", {
+      cy.intercept("GET", "/api/base_conhecimento/listarbase", {
         statusCode: 500,
         body: { detail: "Erro de teste" },
-      }).as("listDocuments");
+      }).as("listKnowledgeBases");
 
-      cy.visitAsUser("/base-conhecimento", authUser);
-      cy.wait("@listDocuments");
+      cy.visitAsUser("/knowledge", authUser);
+      cy.wait("@listKnowledgeBases");
 
       cy.get("[data-cy=knowledge-error]").should(
         "contain",
-        "Nao foi possivel carregar os documentos."
+        "Erro ao carregar as bases de conhecimento."
       );
     });
   });
 
-  it("lista documentos persistidos com tipo, data e status", () => {
+  it("lista bases e documentos da base selecionada", () => {
     cy.fixture("users").then(({ authUser }) => {
       cy.fixture("documents").then((documents) => {
+        cy.intercept("GET", "/api/base_conhecimento/listarbase", documents.bases).as(
+          "listKnowledgeBases"
+        );
         cy.intercept(
           "GET",
-          "/api/base_conhecimento/listardocumentos",
+          "/api/base_conhecimento/listardocumentosbase*",
           documents.items
         ).as("listDocuments");
 
-        cy.visitAsUser("/base-conhecimento", authUser);
+        cy.visitAsUser("/knowledge", authUser);
+        cy.wait("@listKnowledgeBases");
+
+        cy.get("[data-cy=knowledge-base-item]")
+          .should("have.length", 1)
+          .and("contain", "Base principal")
+          .click();
         cy.wait("@listDocuments");
 
-        cy.get("[data-cy=knowledge-documents-count]").should("contain", "2 documentos");
-        cy.get("[data-cy=knowledge-document]").should("have.length", 2);
-        cy.get("[data-cy=knowledge-document]")
+        cy.get("[data-cy=knowledge-documents-count]:visible").should("contain", "2 documentos");
+        cy.get("[data-cy=knowledge-document]:visible").should("have.length", 2);
+        cy.get("[data-cy=knowledge-document]:visible")
           .first()
           .should("contain", "rod-2026.pdf")
           .and("contain", "ROD")
-          .and("contain", "13/05/2026")
           .and("contain", "CONCLUIDO");
-        cy.get("[data-cy=knowledge-document]")
+        cy.get("[data-cy=knowledge-document]:visible")
           .last()
           .should("contain", "portaria-123.pdf")
-          .and("contain", "Portaria")
+          .and("contain", "PORTARIA")
           .and("contain", "PROCESSANDO");
       });
     });
