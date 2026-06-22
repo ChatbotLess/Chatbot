@@ -4,28 +4,28 @@ const metrics = [
     value: 384,
     change: "+8.2%",
     helper: "Nos ultimos 30 dias",
-    accent: "text-emerald-400",
+    accent: "text-ifes-green-700",
   },
   {
     label: "Perguntas Realizadas",
     value: 1264,
     change: "+12.7%",
     helper: "Media mensal",
-    accent: "text-sky-400",
+    accent: "text-ifes-green-700",
   },
   {
     label: "Respostas bem sucedidas",
     value: 1138,
     change: "90.0%",
     helper: "Taxa de sucesso",
-    accent: "text-green-400",
+    accent: "text-ifes-green-700",
   },
   {
     label: "Respostas Mal Sucedidas",
     value: 126,
     change: "10.0%",
     helper: "Taxa de falha",
-    accent: "text-rose-400",
+    accent: "text-ifes-red-700",
   },
 ];
 
@@ -40,9 +40,9 @@ const reformulatedQuestionPerformance = [
 
 function DashboardMetricCard({ label, value, change, helper, accent }) {
   return (
-    <article className="rounded-xl border border-gray-800 bg-gray-900 p-4 shadow-sm transition hover:border-gray-700 xs:p-5">
-      <p className="text-sm text-gray-400">{label}</p>
-      <p className="mt-3 text-2xl font-semibold text-white xs:text-3xl">{value}</p>
+    <article className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-gray-300 xs:p-5">
+      <p className="text-sm text-gray-600">{label}</p>
+      <p className="mt-3 text-2xl font-semibold text-gray-950 xs:text-3xl">{value}</p>
       <div className="mt-4 flex items-center justify-between">
         <span className={`text-sm font-medium ${accent}`}>{change}</span>
         <span className="text-xs text-gray-500">{helper}</span>
@@ -79,12 +79,12 @@ function ReformulatedQuestionsChart() {
   },${height - bottomPadding}`;
 
   return (
-    <section className="rounded-xl border border-gray-800 bg-gray-900 p-4 shadow-sm xs:p-5 md:p-6">
+    <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm xs:p-5 md:p-6">
       <div className="mb-6">
-        <h2 className="text-lg font-semibold text-white">
+        <h2 className="text-lg font-semibold text-gray-950">
           Desempenho de respostas reformuladas
         </h2>
-        <p className="mt-1 text-sm text-gray-400">
+        <p className="mt-1 text-sm text-gray-600">
           Respostas bem sucedidas ao longo dos meses
         </p>
       </div>
@@ -98,8 +98,8 @@ function ReformulatedQuestionsChart() {
         >
           <defs>
             <linearGradient id="successArea" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.35" />
-              <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
+              <stop offset="0%" stopColor="#00843d" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#00843d" stopOpacity="0" />
             </linearGradient>
           </defs>
 
@@ -112,7 +112,7 @@ function ReformulatedQuestionsChart() {
                 y1={y}
                 x2={width - rightPadding}
                 y2={y}
-                stroke="#1f2937"
+                stroke="#e5e7eb"
                 strokeWidth="1"
               />
             );
@@ -122,7 +122,7 @@ function ReformulatedQuestionsChart() {
           <polyline
             points={polylinePoints}
             fill="none"
-            stroke="#38bdf8"
+            stroke="#00843d"
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -130,11 +130,11 @@ function ReformulatedQuestionsChart() {
 
           {points.map((point) => (
             <g key={point.month}>
-              <circle cx={point.x} cy={point.y} r="4.5" fill="#0f172a" stroke="#38bdf8" strokeWidth="2.5" />
-              <text x={point.x} y={height - 20} textAnchor="middle" className="fill-gray-400 text-[11px]">
+              <circle cx={point.x} cy={point.y} r="4.5" fill="#ffffff" stroke="#00843d" strokeWidth="2.5" />
+              <text x={point.x} y={height - 20} textAnchor="middle" className="fill-gray-600 text-[11px]">
                 {point.month}
               </text>
-              <text x={point.x} y={point.y - 12} textAnchor="middle" className="fill-gray-300 text-[11px]">
+              <text x={point.x} y={point.y - 12} textAnchor="middle" className="fill-gray-700 text-[11px]">
                 {point.successfulQuestions}
               </text>
             </g>
@@ -147,11 +147,11 @@ function ReformulatedQuestionsChart() {
 
 export function Dashboard() {
   return (
-    <div className="h-full overflow-y-auto bg-gray-950 px-4 py-6 xs:px-5 md:px-10 md:py-8">
+    <div className="h-full overflow-y-auto bg-gray-50 px-4 py-6 xs:px-5 md:px-10 md:py-8">
       <div className="mx-auto w-full max-w-6xl">
         <header className="mb-6 md:mb-8">
-          <h1 className="text-2xl font-bold text-white md:text-3xl">Dashboard</h1>
-          <p className="mt-2 text-sm text-gray-400">
+          <h1 className="text-2xl font-bold text-gray-950 md:text-3xl">Dashboard</h1>
+          <p className="mt-2 text-sm text-gray-600">
             Acompanhamento geral das metricas da plataforma
           </p>
         </header>

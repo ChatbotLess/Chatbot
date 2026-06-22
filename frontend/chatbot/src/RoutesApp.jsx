@@ -25,14 +25,14 @@ function AppContent() {
   const showSidebar = isValidRoute && !['/login', '/signup'].includes(location.pathname.toLowerCase()); 
 
   return (
-    <div className="flex h-[100dvh] overflow-hidden bg-gray-950">
+    <div className="flex h-[100dvh] overflow-hidden bg-gray-50">
       {showSidebar && (
         <>
-          <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-gray-800 bg-gray-950/95 px-4 text-white backdrop-blur md:hidden">
+          <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-gray-200 bg-white/95 px-4 text-gray-950 backdrop-blur md:hidden">
             <button
               type="button"
               onClick={() => setIsSidebarOpen(true)}
-              className="rounded-md p-2 text-gray-300 transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/70"
+              className="rounded-md p-2 text-gray-700 transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/70"
               aria-label="Abrir menu"
             >
               <MdMenu size={22} />

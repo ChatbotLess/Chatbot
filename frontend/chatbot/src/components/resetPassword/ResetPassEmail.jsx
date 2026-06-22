@@ -24,15 +24,15 @@ export function ResetPassEmail() {
     };
 
     return (
-        <div className="bg-gray-900 rounded-lg p-10 shadow-xl w-full max-w-md">
+        <div className="bg-white rounded-lg p-10 shadow-xl w-full max-w-md">
 
             <form className="space-y-5" onSubmit={handleSubmit(handleReset)}>
                 <header className="mb-6">
-                    <h1 className="text-2xl font-bold text-white">Esqueci minha Senha:</h1>
+                    <h1 className="text-2xl font-bold text-gray-950">Esqueci minha Senha:</h1>
                 </header>
 
                 <div className="space-y-2">
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                         Email:
                     </label>
                     <input
@@ -40,7 +40,7 @@ export function ResetPassEmail() {
                         name="email"
                         id="email"
                         placeholder="Escreva seu email"
-                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:border-transparent transition-all"
                         {...register('email', { required: true })}
                     />
                 </div>
@@ -49,7 +49,7 @@ export function ResetPassEmail() {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full px-4 py-3 bg-ifes-green-600 hover:bg-ifes-green-500 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:ring-offset-2 focus:ring-offset-white disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Mandar E-mail
                     </button>

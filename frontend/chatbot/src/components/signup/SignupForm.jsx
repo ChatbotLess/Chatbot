@@ -28,15 +28,15 @@ export function SignupForm() {
     }
 
     return (
-        <div className="w-full max-w-md rounded-lg bg-gray-900 p-5 shadow-xl xs:p-6 md:p-10">
+        <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl xs:p-6 md:p-10">
 
             <form className="space-y-5" onSubmit={handleSubmit(handleSignup)}>
                 <header className="mb-6">
-                    <h1 className="text-2xl font-bold text-white">Cadastrar</h1>
+                    <h1 className="text-2xl font-bold text-gray-950">Cadastrar</h1>
                 </header>
 
                 <div className="space-y-2">
-                    <label htmlFor="nome" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="nome" className="block text-sm font-medium text-gray-700">
                         Nome:
                     </label>
                     <input
@@ -44,14 +44,14 @@ export function SignupForm() {
                         name="nome"
                         id="nome"
                         placeholder="Escreva seu nome"
-                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:border-transparent transition-all"
                         {...register('nome', { required: true })}
                     />
                 </div>
 
 
                 <div className="space-y-2">
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                         Email:
                     </label>
                     <input
@@ -59,13 +59,13 @@ export function SignupForm() {
                         name="email"
                         id="email"
                         placeholder="Escreva seu email"
-                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:border-transparent transition-all"
                         {...register('email', { required: true })}
                     />
                 </div>
 
                 <div className="space-y-2">
-                    <label htmlFor="senha" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="senha" className="block text-sm font-medium text-gray-700">
                         Senha:
                     </label>
                     <input
@@ -73,7 +73,7 @@ export function SignupForm() {
                         name="senha"
                         id="senha"
                         placeholder="Escreva sua senha"
-                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:border-transparent transition-all"
                         {...register('senha', {
                             required: "Senha obrigatória",
                             minLength: {
@@ -85,7 +85,7 @@ export function SignupForm() {
                 </div>
 
                 <div className="space-y-2">
-                    <label htmlFor="senha2" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="senha2" className="block text-sm font-medium text-gray-700">
                         Escreva a sua senha novamente:
                     </label>
                     <input
@@ -93,7 +93,7 @@ export function SignupForm() {
                         name="senha2"
                         id="senha2"
                         placeholder="Escreva sua senha"
-                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:border-transparent transition-all"
                         {...register('senha2', {
                             required: "Confirme sua senha",
                             validate: (value) =>
@@ -106,13 +106,13 @@ export function SignupForm() {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full px-4 py-3 bg-ifes-green-600 hover:bg-ifes-green-500 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:ring-offset-2 focus:ring-offset-white disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isLoading ? "Cadastrando..." : "Cadastrar-se"}
                     </button>
                     <button
                         type="button"
-                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900"
+                        className="w-full px-4 py-3 bg-ifes-green-600 hover:bg-ifes-green-500 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:ring-offset-2 focus:ring-offset-white"
                         onClick={() => navigate('/login')}
                     >
                         Voltar
