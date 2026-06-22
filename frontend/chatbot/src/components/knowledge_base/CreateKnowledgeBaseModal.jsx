@@ -65,7 +65,7 @@ export function CreateKnowledgeBaseModal({
   if (!isOpen) return null;
 
   const inputClassName =
-    "w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-sm text-gray-100 outline-none transition placeholder:text-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-50";
+    "w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-600 focus:border-ifes-green-500 focus:ring-2 focus:ring-ifes-green-500/20 disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
     <div
@@ -79,16 +79,16 @@ export function CreateKnowledgeBaseModal({
         }
       }}
     >
-      <div className="max-h-full w-full max-w-lg overflow-y-auto rounded-xl border border-gray-700 bg-gray-900 p-5 shadow-2xl xs:p-6">
+      <div className="max-h-full w-full max-w-lg overflow-y-auto rounded-xl border border-gray-300 bg-white p-5 shadow-2xl xs:p-6">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/15 text-blue-400">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ifes-green-500/15 text-ifes-green-700">
               <FaDatabase />
             </div>
             <div>
               <h2
                 id="create-knowledge-base-title"
-                className="text-lg font-semibold text-white"
+                className="text-lg font-semibold text-gray-950"
               >
                 Nova base de conhecimento
               </h2>
@@ -102,7 +102,7 @@ export function CreateKnowledgeBaseModal({
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="rounded-md p-2 text-gray-400 transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-md p-2 text-gray-600 transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Fechar modal"
           >
             <FaTimes />
@@ -113,7 +113,7 @@ export function CreateKnowledgeBaseModal({
           <div>
             <label
               htmlFor="knowledge-base-title"
-              className="mb-1.5 block text-sm font-medium text-gray-300"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
             >
               Título
             </label>
@@ -131,7 +131,7 @@ export function CreateKnowledgeBaseModal({
               })}
             />
             {errors.titulo && (
-              <p className="mt-1 text-xs text-red-300">
+              <p className="mt-1 text-xs text-ifes-red-700">
                 {errors.titulo.message}
               </p>
             )}
@@ -140,7 +140,7 @@ export function CreateKnowledgeBaseModal({
           <div>
             <label
               htmlFor="knowledge-base-version"
-              className="mb-1.5 block text-sm font-medium text-gray-300"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
             >
               Versão
             </label>
@@ -157,7 +157,7 @@ export function CreateKnowledgeBaseModal({
               })}
             />
             {errors.versao && (
-              <p className="mt-1 text-xs text-red-300">
+              <p className="mt-1 text-xs text-ifes-red-700">
                 {errors.versao.message}
               </p>
             )}
@@ -166,7 +166,7 @@ export function CreateKnowledgeBaseModal({
           <div>
             <label
               htmlFor="knowledge-base-description"
-              className="mb-1.5 block text-sm font-medium text-gray-300"
+              className="mb-1.5 block text-sm font-medium text-gray-700"
             >
               Descrição
             </label>
@@ -183,7 +183,7 @@ export function CreateKnowledgeBaseModal({
               })}
             />
             {errors.descricao && (
-              <p className="mt-1 text-xs text-red-300">
+              <p className="mt-1 text-xs text-ifes-red-700">
                 {errors.descricao.message}
               </p>
             )}
@@ -192,7 +192,7 @@ export function CreateKnowledgeBaseModal({
           {error && (
             <div
               role="alert"
-              className="rounded-lg border border-red-900/60 bg-red-950/30 px-3 py-2 text-sm text-red-300"
+              className="rounded-lg border border-ifes-red-200 bg-ifes-red-50 px-3 py-2 text-sm text-ifes-red-700"
             >
               {getErrorMessage(error)}
             </div>
@@ -203,14 +203,14 @@ export function CreateKnowledgeBaseModal({
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-300 transition hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-ifes-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-ifes-green-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isPending ? "Criando..." : "Criar base"}
             </button>

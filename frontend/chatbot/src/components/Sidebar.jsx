@@ -32,10 +32,10 @@ export function Sidebar({ onNavigate }) {
   };
 
   return (
-    <aside className="flex h-full w-[min(18rem,86vw)] shrink-0 flex-col overflow-hidden rounded-r-lg border-r border-gray-800 bg-gray-900 px-3 py-4 text-gray-200 shadow-xl shadow-black/20 md:h-[100dvh]">
+    <aside className="flex h-full w-[min(18rem,86vw)] shrink-0 flex-col overflow-hidden rounded-r-lg border-r border-gray-200 bg-white px-3 py-4 text-gray-800 shadow-xl shadow-gray-200 md:h-[100dvh]">
       <div className="shrink-0">
         <header
-          className="mb-6 flex cursor-pointer items-center gap-2 rounded-md px-1 py-1 transition hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+          className="mb-6 flex cursor-pointer items-center gap-2 rounded-md px-1 py-1 transition hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
           onClick={() => handleNavigate("/")}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {
@@ -46,42 +46,42 @@ export function Sidebar({ onNavigate }) {
           role="button"
           tabIndex={0}
         >
-          <MdOutlineMessage className="text-2xl text-white" />
-          <h1 className="text-2xl font-bold text-white">Chatbot</h1>
+          <MdOutlineMessage className="text-2xl text-gray-950" />
+          <h1 className="text-2xl font-bold text-gray-950">Chatbot</h1>
         </header>
 
         <nav className="flex flex-col gap-1">
           <button
-            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
             onClick={() => handleNavigate("/")}
           >
-            <FaPlus className="shrink-0 text-gray-400" />
+            <FaPlus className="shrink-0 text-gray-600" />
             Nova Conversa
           </button>
 
           {profile?.is_staff && (
             <>
               <button
-                className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
                 onClick={() => handleNavigate("/upload")}
               >
-                <FaFileUpload className="shrink-0 text-gray-400" />
+                <FaFileUpload className="shrink-0 text-gray-600" />
                 Inserir Documentos
               </button>
 
               <button
-                className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
                 onClick={() => handleNavigate("/dashboard")}
               >
-                <FaChartBar className="shrink-0 text-gray-400" />
+                <FaChartBar className="shrink-0 text-gray-600" />
                 Dashboard
               </button>
 
               <button
-                className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
                 onClick={() => handleNavigate("/knowledge")}
               >
-                <FaDatabase className="shrink-0 text-gray-400" />
+                <FaDatabase className="shrink-0 text-gray-600" />
                 Bases de Conhecimento
               </button>
             </>
@@ -94,26 +94,26 @@ export function Sidebar({ onNavigate }) {
           <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
             Historico de conversa
           </h3>
-          <span className="rounded-full bg-gray-800 px-2 py-0.5 text-xs text-gray-400">
+          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
             {data?.length ?? 0}
           </span>
         </div>
 
         <div className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {isLoading && (
-            <div className="rounded-md border border-gray-800 bg-gray-950/60 px-3 py-2 text-sm text-gray-500">
+            <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-500">
               Carregando conversas...
             </div>
           )}
 
           {isError && (
-            <div className="rounded-md border border-red-900/60 bg-red-950/30 px-3 py-2 text-sm text-red-200">
+            <div className="rounded-md border border-ifes-red-200 bg-ifes-red-50 px-3 py-2 text-sm text-ifes-red-700">
               Nao foi possivel carregar o historico.
             </div>
           )}
 
           {!isLoading && !isError && data?.length === 0 && (
-            <div className="rounded-md border border-dashed border-gray-700 px-3 py-4 text-center text-sm text-gray-500">
+            <div className="rounded-md border border-dashed border-gray-300 px-3 py-4 text-center text-sm text-gray-500">
               Nenhuma conversa ainda.
             </div>
           )}
@@ -126,15 +126,15 @@ export function Sidebar({ onNavigate }) {
                 key={chat.id}
                 className={`group flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition ${
                   isActive
-                    ? "bg-blue-600/20 text-white ring-1 ring-blue-500/40"
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                    ? "bg-ifes-green-600/20 text-gray-950 ring-1 ring-ifes-green-500/40"
+                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-950"
                 }`}
                 onClick={() => handleNavigate(`/chat/${chat.id}`)}
                 aria-current={isActive ? "page" : undefined}
               >
                 <MdOutlineMessage
                   className={`shrink-0 ${
-                    isActive ? "text-blue-300" : "text-gray-500 group-hover:text-gray-300"
+                    isActive ? "text-ifes-green-700" : "text-gray-500 group-hover:text-gray-700"
                   }`}
                 />
                 <span className="min-w-0 flex-1 truncate">
@@ -147,20 +147,20 @@ export function Sidebar({ onNavigate }) {
         </div>
       </section>
 
-      <footer className="mt-4 flex shrink-0 items-center gap-3 rounded-lg border border-gray-700 bg-gray-950/50 p-3 transition hover:bg-gray-800">
-        <FaUser size={24} className="shrink-0 text-gray-300" />
+      <footer className="mt-4 flex shrink-0 items-center gap-3 rounded-lg border border-gray-300 bg-gray-50 p-3 transition hover:bg-gray-100">
+        <FaUser size={24} className="shrink-0 text-gray-700" />
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate font-medium uppercase text-white">{userName}</span>
+          <span className="truncate font-medium uppercase text-gray-950">{userName}</span>
 
-          <span className="text-sm text-gray-400">
+          <span className="text-sm text-gray-600">
             {profile?.is_staff ? "Admin" : "Usuario"}
           </span>
         </div>
 
         <button
           onClick={handleLogout}
-          className="cursor-pointer rounded-md p-2 text-gray-400 transition hover:bg-gray-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+          className="cursor-pointer rounded-md p-2 text-gray-600 transition hover:bg-gray-200 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
           title="Sair"
           type="button"
         >
