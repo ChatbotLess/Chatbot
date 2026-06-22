@@ -6,10 +6,10 @@ export function ChatArea1() {
     <div className="flex w-full max-w-3xl flex-col items-center justify-center" data-cy="new-chat-page">
       <div className="mb-6 flex flex-col items-center text-center sm:mb-8">
         <div className="mb-2 flex flex-col items-center gap-2 xs:flex-row xs:gap-3">
-          <MdOutlineMessage className="text-5xl text-white sm:text-6xl" />
-          <h1 className="text-4xl font-bold text-white xs:text-5xl sm:text-6xl">CHATBOT</h1>
+          <MdOutlineMessage className="text-5xl text-gray-950 sm:text-6xl" />
+          <h1 className="text-4xl font-bold text-gray-950 xs:text-5xl sm:text-6xl">CHATBOT</h1>
         </div>
-        <p className="max-w-[28rem] text-sm text-white/80 xs:text-base sm:text-lg">
+        <p className="max-w-[28rem] text-sm text-gray-600 xs:text-base sm:text-lg">
           Seu assistente inteligente para respostas rápidas e precisas
         </p>
       </div>

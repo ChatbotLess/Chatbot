@@ -4,8 +4,6 @@ import { AuthContext } from "../../context/AuthProvider/AuthProvider";
 import { useForm } from 'react-hook-form';
 import { useSearchParams } from "react-router-dom";
 
-
-
 export function ResetPassForm() {
     const [searchParams] = useSearchParams();
     const oobCode = searchParams.get("oobCode");
@@ -20,7 +18,6 @@ export function ResetPassForm() {
 
         try {
             await confirmPassword(oobCode, data.senha);
-            //navigate("/login");
         } catch (error) {
             console.error("Error code:", error.code, "Error message:", error.message);
         } finally {
@@ -29,16 +26,15 @@ export function ResetPassForm() {
     }
 
     return (
-        <div className="bg-gray-900 rounded-lg p-10 shadow-xl w-full max-w-md" data-cy="reset-password-card">
+        <div className="bg-white rounded-lg p-10 shadow-xl w-full max-w-md" data-cy="reset-password-card">
 
             <form className="space-y-5" onSubmit={handleSubmit(handleSignup)} data-cy="reset-password-form">
                 <header className="mb-6">
-                    <h1 className="text-2xl font-bold text-white">Alterar Senha</h1>
+                    <h1 className="text-2xl font-bold text-gray-950">Alterar Senha</h1>
                 </header>
 
-
                 <div className="space-y-2">
-                    <label htmlFor="senha" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="senha" className="block text-sm font-medium text-gray-700">
                         Senha:
                     </label>
                     <input
@@ -47,7 +43,7 @@ export function ResetPassForm() {
                         id="senha"
                         placeholder="Escreva sua senha"
                         data-cy="reset-password-input"
-                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:border-transparent transition-all"
                         {...register('senha', {
                             required: "Senha obrigatória",
                             minLength: {
@@ -59,7 +55,7 @@ export function ResetPassForm() {
                 </div>
 
                 <div className="space-y-2">
-                    <label htmlFor="senha2" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="senha2" className="block text-sm font-medium text-gray-700">
                         Escreva a sua senha novamente:
                     </label>
                     <input
@@ -68,7 +64,7 @@ export function ResetPassForm() {
                         id="senha2"
                         placeholder="Escreva sua senha"
                         data-cy="reset-confirm-password-input"
-                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:border-transparent transition-all"
                         {...register('senha2', {
                             required: "Confirme sua senha",
                             validate: (value) =>
@@ -82,14 +78,14 @@ export function ResetPassForm() {
                         type="submit"
                         disabled={isLoading}
                         data-cy="reset-password-submit"
-                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full px-4 py-3 bg-ifes-green-600 hover:bg-ifes-green-500 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:ring-offset-2 focus:ring-offset-white disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isLoading ? "Cadastrando..." : "Cadastrar-se"}
                     </button>
                     <button
                         type="button"
                         data-cy="reset-password-back"
-                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900" 
+                        className="w-full px-4 py-3 bg-ifes-green-600 hover:bg-ifes-green-500 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:ring-offset-2 focus:ring-offset-white"
                         onClick={() => navigate('/login')}
                     >
                         Voltar

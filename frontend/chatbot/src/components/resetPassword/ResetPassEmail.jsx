@@ -13,7 +13,7 @@ export function ResetPassEmail() {
         setIsLoading(true);
 
         const actionCodeSettings = {
-            url: "http://localhost:5173/", // sua página
+            url: "http://localhost:5173/",
             handleCodeInApp: true,
         };
 
@@ -28,15 +28,15 @@ export function ResetPassEmail() {
     };
 
     return (
-        <div className="bg-gray-900 rounded-lg p-10 shadow-xl w-full max-w-md" data-cy="reset-email-card">
+        <div className="bg-white rounded-lg p-10 shadow-xl w-full max-w-md" data-cy="reset-email-card">
 
             <form className="space-y-5" onSubmit={handleSubmit(handleReset)} data-cy="reset-email-form">
                 <header className="mb-6">
-                    <h1 className="text-2xl font-bold text-white">Esqueci minha Senha:</h1>
+                    <h1 className="text-2xl font-bold text-gray-950">Esqueci minha Senha:</h1>
                 </header>
 
                 <div className="space-y-2">
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                         Email:
                     </label>
                     <input
@@ -45,7 +45,7 @@ export function ResetPassEmail() {
                         id="email"
                         placeholder="Escreva seu email"
                         data-cy="reset-email-input"
-                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:border-transparent transition-all"
                         {...register('email', { required: true })}
                     />
                 </div>
@@ -55,7 +55,7 @@ export function ResetPassEmail() {
                         type="submit"
                         disabled={isLoading}
                         data-cy="reset-email-submit"
-                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full px-4 py-3 bg-ifes-green-600 hover:bg-ifes-green-500 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:ring-offset-2 focus:ring-offset-white disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Mandar E-mail
                     </button>

@@ -23,15 +23,15 @@ export function LoginForm() {
     };
 
     return (
-        <div className="w-full max-w-md rounded-lg bg-gray-900 p-5 shadow-xl xs:p-6 md:p-10" data-cy="login-card">
+        <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl xs:p-6 md:p-10" data-cy="login-card">
 
             <form className="space-y-5" onSubmit={handleSubmit(handleLogin)} data-cy="login-form">
                 <header className="mb-6">
-                    <h1 className="text-2xl font-bold text-white">LOGIN</h1>
+                    <h1 className="text-2xl font-bold text-gray-950">LOGIN</h1>
                 </header>
 
                 <div className="space-y-2">
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                         Email:
                     </label>
                     <input
@@ -40,13 +40,13 @@ export function LoginForm() {
                         id="email"
                         placeholder="Escreva seu email"
                         data-cy="login-email"
-                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:border-transparent transition-all"
                         {...register('email', { required: true })}
                     />
                 </div>
 
                 <div className="space-y-2">
-                    <label htmlFor="senha" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="senha" className="block text-sm font-medium text-gray-700">
                         Senha:
                     </label>
                     <input
@@ -55,7 +55,7 @@ export function LoginForm() {
                         id="senha"
                         placeholder="Escreva sua senha"
                         data-cy="login-password"
-                        className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-md text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
+                        className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:border-transparent transition-all"
                         {...register('senha', { required: true })}
                     />
                 </div>
@@ -63,7 +63,7 @@ export function LoginForm() {
                 <div>
                     <button
                         type="button"
-                        className="text-sm text-gray-200 underline-offset-4 transition hover:text-white hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                        className="text-sm text-gray-800 underline-offset-4 transition hover:text-gray-950 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
                         data-cy="forgot-password-link"
                         onClick={() => navigate('/reset')}
                     >
@@ -76,14 +76,14 @@ export function LoginForm() {
                         type="submit"
                         disabled={isLoading}
                         data-cy="login-submit"
-                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full px-4 py-3 bg-ifes-green-600 hover:bg-ifes-green-500 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:ring-offset-2 focus:ring-offset-white disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isLoading ? "Entrando..." : "Entrar"}
                     </button>
                     <button
                         type="button"
                         data-cy="signup-link"
-                        className="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-gray-900"
+                        className="w-full px-4 py-3 bg-ifes-green-600 hover:bg-ifes-green-500 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:ring-offset-2 focus:ring-offset-white"
                         onClick={() => navigate('/signup')}
                     >
                         Cadastrar-se

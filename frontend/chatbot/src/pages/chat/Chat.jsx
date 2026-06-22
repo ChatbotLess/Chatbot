@@ -5,7 +5,7 @@ export function Chat() {
   const { conversationId } = useParams();
 
   return (
-    <div className="flex h-full min-h-0 justify-center bg-gray-950">
+    <div className="flex h-full min-h-0 justify-center bg-gray-50">
       <ChatArea2 conversationId={conversationId}/>
     </div>
   )

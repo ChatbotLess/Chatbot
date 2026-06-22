@@ -57,12 +57,12 @@ export function Promptbar() {
 
   return (
     <form className="w-full" onSubmit={handleSubmit(handlePerguntar)} data-cy="prompt-form">
-      <div className="flex items-center gap-2 rounded-xl border border-gray-700 bg-gray-800 px-3 py-2 shadow-lg shadow-black/10 transition focus-within:border-blue-500/60 focus-within:ring-2 focus-within:ring-blue-500/20">
+      <div className="flex items-center gap-2 rounded-xl border border-gray-300 bg-gray-100 px-3 py-2 shadow-lg shadow-gray-200 transition focus-within:border-ifes-green-500/60 focus-within:ring-2 focus-within:ring-ifes-green-500/20">
         <input
           type="text"
           data-cy="prompt-input"
-          placeholder="Olá, como posso te ajudar?"
-          className="min-h-11 min-w-0 flex-1 bg-transparent text-sm text-gray-200 outline-none placeholder:text-gray-400 disabled:opacity-50 xs:text-base"
+          placeholder="OlÃ¡, como posso te ajudar?"
+          className="min-h-11 min-w-0 flex-1 bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-600 disabled:opacity-50 xs:text-base"
           disabled={busy}
           {...register("message", { required: true })}
         />
@@ -70,10 +70,10 @@ export function Promptbar() {
           type="submit"
           disabled={busy}
           data-cy="prompt-submit"
-          className="rounded-lg p-2 text-gray-300 transition hover:bg-gray-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-lg p-2 text-gray-700 transition hover:bg-gray-200 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60 disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={busy ? "Aguarde a resposta" : "Enviar mensagem"}
         >
-          <TbSend size={20} className="text-gray-300" />
+          <TbSend size={20} className="text-gray-700" />
         </button>
       </div>
     </form>
