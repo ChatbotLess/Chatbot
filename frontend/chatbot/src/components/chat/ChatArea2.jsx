@@ -21,7 +21,7 @@ const markdownComponents = {
       {...props}
       target="_blank"
       rel="noreferrer"
-          className="text-ifes-green-700 underline decoration-ifes-green-500/50 underline-offset-2 transition hover:text-ifes-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
+      className="text-ifes-green-700 underline decoration-ifes-green-500/50 underline-offset-2 transition hover:text-ifes-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
     />
   ),
 
@@ -230,6 +230,7 @@ const FeedbackActions = memo(function FeedbackActions({
           type="button"
           onClick={handleLike}
           disabled={isPending}
+          data-cy="feedback-like"
           className={`rounded-md p-1.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60 disabled:cursor-not-allowed disabled:opacity-50 ${
             selectedFeedback === "LIKE"
               ? "bg-ifes-green-500/20 text-ifes-green-700"
@@ -245,6 +246,7 @@ const FeedbackActions = memo(function FeedbackActions({
           type="button"
           onClick={handleDislikeClick}
           disabled={isPending}
+          data-cy="feedback-dislike"
           className={`rounded-md p-1.5 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60 disabled:cursor-not-allowed disabled:opacity-50 ${
             selectedFeedback === "DISLIKE"
               ? "bg-ifes-red-500/20 text-ifes-red-700"
@@ -286,7 +288,7 @@ const MessageBubble = memo(function MessageBubble({
   const isUser = message.role === "user";
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`} data-cy={`message-${message.role}`}>
       <div className={`max-w-[92%] sm:max-w-[85%] ${isUser ? "flex justify-end" : ""}`}>
         <div
           className={
@@ -294,6 +296,7 @@ const MessageBubble = memo(function MessageBubble({
           }
         >
           <article
+            data-message-id={message.id}
             className={`break-words rounded-lg px-3 py-2.5 text-sm leading-6 shadow-sm xs:px-4 xs:py-3 ${
               isUser
                 ? "whitespace-pre-wrap bg-ifes-green-600 text-white"
@@ -456,14 +459,14 @@ export function ChatArea2({ conversationId }) {
             }`}
           >
             {pendingUserMessage && (
-              <div className="flex justify-end">
+              <div className="flex justify-end" data-cy="message-user">
                 <article className="max-w-[92%] break-words rounded-lg bg-ifes-green-600 px-3 py-2.5 text-sm leading-6 text-white shadow-sm whitespace-pre-wrap xs:px-4 xs:py-3 sm:max-w-[85%]">
                   {pendingUserMessage}
                 </article>
               </div>
             )}
 
-            <div className="flex justify-start">
+            <div className="flex justify-start" data-cy="message-assistant">
               <article className="max-w-[92%] break-words rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm leading-6 text-gray-900 shadow-sm xs:px-4 xs:py-3 sm:max-w-[85%]">
                 {streamingText ? (
                   <MarkdownMessage content={streamingText} />

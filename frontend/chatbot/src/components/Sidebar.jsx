@@ -32,7 +32,10 @@ export function Sidebar({ onNavigate }) {
   };
 
   return (
-    <aside className="flex h-full w-[min(18rem,86vw)] shrink-0 flex-col overflow-hidden rounded-r-lg border-r border-gray-200 bg-white px-3 py-4 text-gray-800 shadow-xl shadow-gray-200 md:h-[100dvh]">
+    <aside
+      className="flex h-full w-[min(18rem,86vw)] shrink-0 flex-col overflow-hidden rounded-r-lg border-r border-gray-200 bg-white px-3 py-4 text-gray-800 shadow-xl shadow-gray-200 md:h-[100dvh]"
+      data-cy="sidebar"
+    >
       <div className="shrink-0">
         <header
           className="mb-6 flex cursor-pointer items-center gap-2 rounded-md px-1 py-1 transition hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
@@ -53,6 +56,7 @@ export function Sidebar({ onNavigate }) {
         <nav className="flex flex-col gap-1">
           <button
             className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
+            data-cy="sidebar-new-chat"
             onClick={() => handleNavigate("/")}
           >
             <FaPlus className="shrink-0 text-gray-600" />
@@ -63,6 +67,7 @@ export function Sidebar({ onNavigate }) {
             <>
               <button
                 className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
+                data-cy="sidebar-upload"
                 onClick={() => handleNavigate("/upload")}
               >
                 <FaFileUpload className="shrink-0 text-gray-600" />
@@ -71,6 +76,7 @@ export function Sidebar({ onNavigate }) {
 
               <button
                 className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
+                data-cy="sidebar-dashboard"
                 onClick={() => handleNavigate("/dashboard")}
               >
                 <FaChartBar className="shrink-0 text-gray-600" />
@@ -79,6 +85,7 @@ export function Sidebar({ onNavigate }) {
 
               <button
                 className="flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-medium transition hover:bg-gray-100 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
+                data-cy="sidebar-knowledge-base"
                 onClick={() => handleNavigate("/knowledge")}
               >
                 <FaDatabase className="shrink-0 text-gray-600" />
@@ -95,6 +102,7 @@ export function Sidebar({ onNavigate }) {
             Historico de conversa
           </h3>
           <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">
+            <span className="sr-only">Total de conversas: </span>
             {data?.length ?? 0}
           </span>
         </div>
@@ -129,6 +137,7 @@ export function Sidebar({ onNavigate }) {
                     ? "bg-ifes-green-600/20 text-gray-950 ring-1 ring-ifes-green-500/40"
                     : "text-gray-700 hover:bg-gray-100 hover:text-gray-950"
                 }`}
+                data-cy="chat-history-item"
                 onClick={() => handleNavigate(`/chat/${chat.id}`)}
                 aria-current={isActive ? "page" : undefined}
               >
@@ -161,6 +170,7 @@ export function Sidebar({ onNavigate }) {
         <button
           onClick={handleLogout}
           className="cursor-pointer rounded-md p-2 text-gray-600 transition hover:bg-gray-200 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
+          data-cy="logout-button"
           title="Sair"
           type="button"
         >

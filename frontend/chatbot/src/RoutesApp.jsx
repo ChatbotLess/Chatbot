@@ -17,12 +17,31 @@ import PrivateRoute from './context/AuthProvider/privateRoute';
 import PublicRoute from './context/AuthProvider/publicRoute';
 import StaffRoute from './context/AuthProvider/staffRoute';
 
+function StaffPage({ children }) {
+  return (
+    <PrivateRoute>
+      <StaffRoute>
+        {children}
+      </StaffRoute>
+    </PrivateRoute>
+  );
+}
+
 function AppContent() {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const validRoutes = ['/', '/chat', '/dashboard', '/upload', '/knowledge', '/login', '/signup'];
+  const validRoutes = [
+    '/',
+    '/chat',
+    '/dashboard',
+    '/upload',
+    '/knowledge',
+    '/base-conhecimento',
+    '/login',
+    '/signup',
+  ];
   const isValidRoute = validRoutes.includes(location.pathname) || location.pathname.startsWith('/chat/');
-  const showSidebar = isValidRoute && !['/login', '/signup'].includes(location.pathname.toLowerCase()); 
+  const showSidebar = isValidRoute && !['/login', '/signup'].includes(location.pathname.toLowerCase());
 
   return (
     <div className="flex h-[100dvh] overflow-hidden bg-gray-50">
@@ -78,25 +97,24 @@ function AppContent() {
             </PrivateRoute>
           } />
           <Route path='/dashboard' element={
-            <PrivateRoute>
-              <StaffRoute>
-                <Dashboard />
-              </StaffRoute>
-            </PrivateRoute>
+            <StaffPage>
+              <Dashboard />
+            </StaffPage>
           } />
           <Route path='/upload' element={
-            <PrivateRoute>
-              <StaffRoute>
-                <FileUpload />
-              </StaffRoute>
-            </PrivateRoute>
+            <StaffPage>
+              <FileUpload />
+            </StaffPage>
           } />
           <Route path='/knowledge' element={
-            <PrivateRoute>
-              <StaffRoute>
-                <KnowledgeBase />
-              </StaffRoute>
-            </PrivateRoute>
+            <StaffPage>
+              <KnowledgeBase />
+            </StaffPage>
+          } />
+          <Route path='/base-conhecimento' element={
+            <StaffPage>
+              <KnowledgeBase />
+            </StaffPage>
           } />
           <Route path='/login' element={
             <PublicRoute>

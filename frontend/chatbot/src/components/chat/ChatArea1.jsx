@@ -1,10 +1,9 @@
-import { Promptbar } from "../Promptbar"
+import { Promptbar } from "../Promptbar";
 import { MdOutlineMessage } from "react-icons/md";
-
 
 export function ChatArea1() {
   return (
-    <div className="flex w-full max-w-3xl flex-col items-center justify-center">
+    <div className="flex w-full max-w-3xl flex-col items-center justify-center" data-cy="new-chat-page">
       <div className="mb-6 flex flex-col items-center text-center sm:mb-8">
         <div className="mb-2 flex flex-col items-center gap-2 xs:flex-row xs:gap-3">
           <MdOutlineMessage className="text-5xl text-gray-950 sm:text-6xl" />
@@ -15,8 +14,8 @@ export function ChatArea1() {
         </p>
       </div>
       <div className="w-full max-w-[700px]">
-        <Promptbar/>
+        <Promptbar />
       </div>
     </div>
-  )
+  );
 }

@@ -41,45 +41,38 @@ const fetchChatFeedbacks = async (chatId) => {
   return response.data ?? [];
 };
 
-export function useChatData(enabled = true){
+export function useChatData(enabled = true) {
   const { user } = useContext(AuthContext);
   const chatScope = getChatQueryScope(user);
 
-  const query = useQuery({
+  return useQuery({
     queryFn: fetchChats,
     queryKey: chatQueryKeys.chats(chatScope),
     refetchOnWindowFocus: false,
     enabled: enabled && Boolean(user?.uid),
-  })
-
-  return query;
+  });
 }
 
 export function useChatFeedbacks(chatId, enabled = true) {
   const { user } = useContext(AuthContext);
   const chatScope = getChatQueryScope(user);
 
-  const query = useQuery({
+  return useQuery({
     queryFn: () => fetchChatFeedbacks(chatId),
     queryKey: chatQueryKeys.feedbacks(chatScope, chatId),
     refetchOnWindowFocus: false,
     enabled: enabled && Boolean(user?.uid) && Boolean(chatId),
   });
-
-  return query;
 }
 
 export function useChatMessages(chatId, enabled = true) {
   const { user } = useContext(AuthContext);
   const chatScope = getChatQueryScope(user);
 
-  const query = useQuery({
+  return useQuery({
     queryFn: () => fetchChatMessages(chatId),
     queryKey: chatQueryKeys.messages(chatScope, chatId),
     refetchOnWindowFocus: false,
     enabled: enabled && Boolean(user?.uid) && Boolean(chatId),
   });
-
-  return query;
 }
-

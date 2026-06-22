@@ -4,6 +4,7 @@ import { updateProfile } from "firebase/auth";
 import { AuthContext } from "../../context/AuthProvider/AuthProvider";
 import { useForm } from 'react-hook-form';
 
+const isE2EAuthEnabled = import.meta.env.VITE_E2E_AUTH === "true";
 
 export function SignupForm() {
     const { register, handleSubmit, watch } = useForm();
@@ -16,8 +17,11 @@ export function SignupForm() {
 
         try {
             const credential = await createUser(data.email, data.senha);
-            await updateProfile(credential.user, { displayName: data.nome });
-            await credential.user.getIdToken(true);
+
+            if (!isE2EAuthEnabled) {
+                await updateProfile(credential.user, { displayName: data.nome });
+                await credential.user.getIdToken(true);
+            }
             
             navigate("/login");
         } catch (error) {
@@ -28,9 +32,9 @@ export function SignupForm() {
     }
 
     return (
-        <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl xs:p-6 md:p-10">
+        <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl xs:p-6 md:p-10" data-cy="signup-card">
 
-            <form className="space-y-5" onSubmit={handleSubmit(handleSignup)}>
+            <form className="space-y-5" onSubmit={handleSubmit(handleSignup)} data-cy="signup-form">
                 <header className="mb-6">
                     <h1 className="text-2xl font-bold text-gray-950">Cadastrar</h1>
                 </header>
@@ -44,11 +48,11 @@ export function SignupForm() {
                         name="nome"
                         id="nome"
                         placeholder="Escreva seu nome"
+                        data-cy="signup-name"
                         className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:border-transparent transition-all"
                         {...register('nome', { required: true })}
                     />
                 </div>
-
 
                 <div className="space-y-2">
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -59,6 +63,7 @@ export function SignupForm() {
                         name="email"
                         id="email"
                         placeholder="Escreva seu email"
+                        data-cy="signup-email"
                         className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:border-transparent transition-all"
                         {...register('email', { required: true })}
                     />
@@ -73,6 +78,7 @@ export function SignupForm() {
                         name="senha"
                         id="senha"
                         placeholder="Escreva sua senha"
+                        data-cy="signup-password"
                         className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:border-transparent transition-all"
                         {...register('senha', {
                             required: "Senha obrigatória",
@@ -93,6 +99,7 @@ export function SignupForm() {
                         name="senha2"
                         id="senha2"
                         placeholder="Escreva sua senha"
+                        data-cy="signup-confirm-password"
                         className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:border-transparent transition-all"
                         {...register('senha2', {
                             required: "Confirme sua senha",
@@ -106,12 +113,14 @@ export function SignupForm() {
                     <button
                         type="submit"
                         disabled={isLoading}
+                        data-cy="signup-submit"
                         className="w-full px-4 py-3 bg-ifes-green-600 hover:bg-ifes-green-500 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:ring-offset-2 focus:ring-offset-white disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isLoading ? "Cadastrando..." : "Cadastrar-se"}
                     </button>
                     <button
                         type="button"
+                        data-cy="signup-back"
                         className="w-full px-4 py-3 bg-ifes-green-600 hover:bg-ifes-green-500 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-ifes-green-500/60 focus:ring-offset-2 focus:ring-offset-white"
                         onClick={() => navigate('/login')}
                     >

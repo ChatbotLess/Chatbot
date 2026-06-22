@@ -1,7 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { getAuthHeaders } from "../services/api";
 
-const BASE_URL = `http://${window.location.hostname}:8000`;
+const isE2EAuthEnabled = import.meta.env.VITE_E2E_AUTH === "true";
+const BASE_URL = isE2EAuthEnabled ? "" : `http://${window.location.hostname}:8000`;
 
 /**
  * Envia uma mensagem para o backend via streaming (fetch nativo).
@@ -21,7 +22,7 @@ const postMessage = async ({ message, chatID = null }) => {
   });
 
   if (!response.ok) {
-    throw new Error(`Erro na requisição: ${response.status}`);
+    throw new Error(`Erro na requisicao: ${response.status}`);
   }
 
   const chatId = response.headers.get("X-Chat-Id");

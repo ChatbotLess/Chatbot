@@ -12,7 +12,7 @@ class DocumentoSchemaOut(ModelSchema):
 class BaseConhecimentoIn(ModelSchema):
     class Meta:
        model = Base_Conhecimento
-       fields = ['titulo','descricao','versao']
+       fields = ['id','titulo','descricao','versao']
 
 class BaseConhecimentoOut(ModelSchema):    
     class Meta:

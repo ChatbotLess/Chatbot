@@ -62,8 +62,7 @@ export function UploadArea() {
   const isBaseSelectDisabled = isLoadingBases || isErrorBases || bases.length === 0;
 
   return (
-    <div className="space-y-6">
-      {/* ── Configurações ──────────────────────────────────────────────── */}
+    <div className="space-y-6" data-cy="upload-area">
       <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm xs:p-5 md:p-6">
         <h2 className="text-lg font-semibold text-gray-950 xs:text-xl">Configurações do envio</h2>
         <p className="mt-2 max-w-2xl text-sm text-gray-600">
@@ -71,7 +70,6 @@ export function UploadArea() {
         </p>
 
         <div className="mt-5 grid gap-5 md:mt-6 md:grid-cols-2">
-          {/* Base selector */}
           <div>
             <label htmlFor="base-select" className="mb-2 block text-sm font-medium text-gray-700">
               Base de conhecimento
@@ -81,6 +79,7 @@ export function UploadArea() {
               value={selectedBaseId}
               onChange={(e) => setSelectedBaseId(e.target.value)}
               disabled={isBaseSelectDisabled}
+              data-cy="base-select"
               className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-950 transition focus:border-ifes-green-500 focus:outline-none focus:ring-1 focus:ring-ifes-green-500 disabled:opacity-50"
             >
               <option value="">
@@ -94,7 +93,7 @@ export function UploadArea() {
               </option>
               {bases.map((base) => (
                 <option key={base.id} value={base.id}>
-                  {base.titulo} — v{base.versao}
+                  {base.titulo} - v{base.versao}
                   {base.status === "ATIVO" ? " (Ativa)" : ""}
                 </option>
               ))}
@@ -106,7 +105,6 @@ export function UploadArea() {
             )}
           </div>
 
-          {/* Tipo selector */}
           <div>
             <label htmlFor="tipo-select" className="mb-2 block text-sm font-medium text-gray-700">
               Tipo de documento
@@ -115,6 +113,7 @@ export function UploadArea() {
               id="tipo-select"
               value={selectedTipo}
               onChange={(e) => setSelectedTipo(e.target.value)}
+              data-cy="document-type-select"
               className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-950 transition focus:border-ifes-green-500 focus:outline-none focus:ring-1 focus:ring-ifes-green-500"
             >
               <option value="">Selecione o tipo</option>
@@ -128,7 +127,6 @@ export function UploadArea() {
         </div>
       </section>
 
-      {/* ── Upload area ────────────────────────────────────────────────── */}
       <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm xs:p-5 md:p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
@@ -138,18 +136,19 @@ export function UploadArea() {
             </p>
           </div>
 
-          {selectedFile && (
-            <div className="rounded-lg border border-ifes-green-500/30 bg-ifes-green-500/10 px-4 py-3 text-sm text-ifes-green-700">
-              1 documento selecionado
-            </div>
-          )}
+          <div
+            className="rounded-lg border border-ifes-green-500/30 bg-ifes-green-500/10 px-4 py-3 text-sm text-ifes-green-700"
+            data-cy="selected-documents-count"
+          >
+            {selectedFile ? "1 documento selecionado" : "0 documentos selecionados"}
+          </div>
         </div>
 
-        {/* Dropzone */}
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={!!selectedFile}
+          data-cy="file-select-button"
           className={`mt-6 flex w-full flex-col items-center justify-center rounded-xl border border-dashed px-4 py-10 text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60 xs:px-6 md:py-12 ${
             selectedFile
               ? "cursor-not-allowed border-gray-200 bg-white opacity-50"
@@ -174,19 +173,22 @@ export function UploadArea() {
           type="file"
           accept="application/pdf"
           onChange={handleFileSelected}
+          data-cy="file-input"
           className="hidden"
         />
       </section>
 
-      {/* ── File preview ───────────────────────────────────────────────── */}
-      {selectedFile && (
+      {selectedFile ? (
         <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm xs:p-5 md:p-6">
           <h3 className="text-lg font-semibold text-gray-950">Documento selecionado</h3>
           <p className="mt-1 text-sm text-gray-600">
             Confira o arquivo antes de enviá-lo.
           </p>
 
-          <div className="mt-5 flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-4 md:flex-row md:items-center md:justify-between">
+          <div
+            className="mt-5 flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-4 md:flex-row md:items-center md:justify-between"
+            data-cy="selected-document"
+          >
             <div className="flex min-w-0 items-center gap-4">
               <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-ifes-red-500/10 text-ifes-red-700">
                 <FaFilePdf className="text-lg" />
@@ -203,6 +205,7 @@ export function UploadArea() {
               type="button"
               onClick={handleRemoveFile}
               disabled={uploadMutation.isPending}
+              data-cy="remove-document"
               className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-ifes-red-500/40 hover:bg-ifes-red-500/10 hover:text-ifes-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-red-500/60 disabled:cursor-not-allowed disabled:opacity-50 md:self-auto"
             >
               <FaTrashAlt />
@@ -210,14 +213,21 @@ export function UploadArea() {
             </button>
           </div>
         </section>
+      ) : (
+        <div
+          className="rounded-xl border border-dashed border-gray-300 bg-white px-4 py-10 text-center text-sm text-gray-500"
+          data-cy="upload-empty-state"
+        >
+          Nenhum documento PDF foi inserido ainda.
+        </div>
       )}
 
-      {/* ── Upload button ──────────────────────────────────────────────── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
         <button
           type="button"
           onClick={handleUpload}
           disabled={!isFormReady || uploadMutation.isPending}
+          data-cy="upload-submit"
           className={`inline-flex w-full items-center justify-center gap-3 rounded-xl px-6 py-3.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60 sm:w-auto sm:px-8 ${
             isFormReady && !uploadMutation.isPending
               ? "bg-ifes-green-600 text-white shadow-lg shadow-ifes-green-600/20 hover:bg-ifes-green-500"
@@ -227,7 +237,7 @@ export function UploadArea() {
           {uploadMutation.isPending ? (
             <>
               <FaSpinner className="animate-spin" />
-              Enviando…
+              Enviando...
             </>
           ) : (
             <>
@@ -237,24 +247,21 @@ export function UploadArea() {
           )}
         </button>
 
-        {/* Success feedback */}
         {uploadMutation.isSuccess && (
-            <span className="inline-flex items-center gap-2 text-sm font-medium text-ifes-green-700">
+          <span className="inline-flex items-center gap-2 text-sm font-medium text-ifes-green-700" data-cy="upload-success">
             <FaCheckCircle />
             Documento enviado com sucesso!
           </span>
         )}
 
-        {/* Error feedback */}
         {uploadMutation.isError && (
-            <span className="inline-flex items-start gap-2 text-sm font-medium text-ifes-red-700">
+          <span className="inline-flex items-start gap-2 text-sm font-medium text-ifes-red-700" data-cy="upload-error">
             <FaExclamationTriangle />
             Erro ao enviar: {uploadMutation.error?.response?.data?.erro || uploadMutation.error?.message}
           </span>
         )}
       </div>
 
-      {/* ── Validation hints ───────────────────────────────────────────── */}
       {!isFormReady && (selectedFile || selectedBaseId || selectedTipo) && (
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm text-amber-300/80">
           <p className="font-medium text-amber-300">Para enviar, preencha todos os campos:</p>
