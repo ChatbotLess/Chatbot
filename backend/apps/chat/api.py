@@ -1,8 +1,10 @@
 from ninja import Router
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from ninja.errors import HttpError
 from apps.chat.models import Chat, Mensagem, Feedback
+from apps.rag.models import MensagemChunk
 from apps.chat.schemas import MensagemSchemaOut
 from .schemas import ChatSchema, FeedbackSchemaIn, FeedbackSchemaOut
 
@@ -16,7 +18,12 @@ def listar_chats(request):
 @router.get("/listarmensagem", response=list[MensagemSchemaOut], tags=["Chat"])
 def listar_mensagem(request, chatID: str):
     chat = get_object_or_404(Chat, id=chatID, usuario=request.auth)
-    mensagens = chat.mensagens.order_by("id")
+    mensagens = chat.mensagens.prefetch_related(
+        Prefetch(
+            "mensagem_chunks",
+            queryset=MensagemChunk.objects.select_related("chunk").order_by("id"),
+        )
+    ).order_by("id")
     return mensagens
 
 @router.post("/chat/", response=ChatSchema, tags=["Chat"])

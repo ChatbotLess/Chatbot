@@ -45,6 +45,13 @@ describe("chat", () => {
           "contain",
           "Resposta gerada pelo teste."
         );
+        cy.get("[data-cy=message-sources-toggle]").should("contain", "Fontes");
+        cy.get("[data-cy=message-sources-list]").should("not.exist");
+        cy.get("[data-cy=message-sources-toggle]").click();
+        cy.get("[data-cy=message-sources-list]").should(
+          "contain",
+          "manual-institucional.pdf"
+        );
       });
     });
   });

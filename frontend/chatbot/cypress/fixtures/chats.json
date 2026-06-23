@@ -16,7 +16,17 @@
     {
       "id": 202,
       "role": "assistant",
-      "conteudo": "Resposta gerada pelo teste."
+      "conteudo": "Resposta gerada pelo teste.",
+      "fontes": [
+        {
+          "chunk_id": 501,
+          "node_id": "node-501",
+          "nome_arquivo": "manual-institucional.pdf",
+          "tipo": "ROD",
+          "data": "2026-06-01",
+          "trecho": "Trecho usado como contexto para a resposta gerada pelo teste."
+        }
+      ]
     }
   ],
   "existingMessages": [
@@ -28,7 +38,17 @@
     {
       "id": 302,
       "role": "assistant",
-      "conteudo": "A base de conhecimento guarda documentos indexados para consulta."
+      "conteudo": "A base de conhecimento guarda documentos indexados para consulta.",
+      "fontes": [
+        {
+          "chunk_id": 601,
+          "node_id": "node-601",
+          "nome_arquivo": "base-conhecimento.pdf",
+          "tipo": "PORTARIA",
+          "data": "2026-05-20",
+          "trecho": "A base de conhecimento guarda documentos indexados para consulta."
+        }
+      ]
     }
   ],
   "feedbacks": []
