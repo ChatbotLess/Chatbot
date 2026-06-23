@@ -61,7 +61,7 @@ export function Promptbar() {
         <input
           type="text"
           data-cy="prompt-input"
-          placeholder="OlÃ¡, como posso te ajudar?"
+          placeholder="Olá !, como posso te ajudar?"
           className="min-h-11 min-w-0 flex-1 bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-600 disabled:opacity-50 xs:text-base"
           disabled={busy}
           {...register("message", { required: true })}

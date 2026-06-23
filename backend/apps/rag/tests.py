@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from apps.chat.models import Chat
+from apps.rag.rag import Rag
 from apps.rag import services
 
 
@@ -98,3 +99,34 @@ class AimlServiceResponderTests(TestCase):
             resposta = services.AimlService.responder("pergunta aiml")
 
         self.assertEqual(resposta, "Resposta AIML")
+
+
+class RagPromptClassificacaoTests(TestCase):
+    def test_busca_hibrida_filtra_apenas_por_base(self):
+        rag = Rag()
+        rag.hybrid_index = MagicMock()
+        rag.hybrid_index.as_retriever.side_effect = ["vector-retriever", "text-retriever"]
+
+        with patch("apps.rag.rag.QueryFusionRetriever") as fusion_mock, patch(
+            "apps.rag.rag.CompactAndRefine"
+        ) as synthesizer_mock:
+            rag.busca_hibrida(base_id=42)
+
+        self.assertEqual(rag.hybrid_index.as_retriever.call_count, 2)
+
+        for chamada in rag.hybrid_index.as_retriever.call_args_list:
+            filtros = chamada.kwargs["filters"]
+            self.assertEqual(len(filtros.filters), 1)
+            self.assertEqual(filtros.filters[0].key, "base")
+            self.assertEqual(filtros.filters[0].value, 42)
+
+        fusion_mock.assert_called_once()
+        synthesizer_mock.assert_called_once_with(streaming=True)
+
+    def test_prompt_usa_classificacao_como_contexto_e_nao_como_filtro(self):
+        prompt = Rag()._montar_system_prompt("portaria")
+
+        self.assertIn("PORTARIA", prompt)
+        self.assertIn("nao e uma evidencia documental nem um filtro", prompt)
+        self.assertIn("nao descarte trechos recuperados de outras categorias", prompt)
+        self.assertIn("pergunta complementar", prompt)
