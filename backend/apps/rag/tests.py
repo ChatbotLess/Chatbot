@@ -23,19 +23,20 @@ class FazerPerguntaTests(TestCase):
             services.fazer_pergunta(pergunta_usuario="Pergunta sem usuario")
 
     @patch("apps.rag.services.salvar_mensagem")
-    @patch("apps.rag.services.ChunkDocumento.objects.exists", return_value=False)
+    @patch("apps.rag.services.base_ativa_tem_documentos", return_value=False)
     def test_fazer_pergunta_creates_chat_with_truncated_title_and_sem_docs_stream(
-        self, _exists_mock, salvar_mensagem_mock
+        self, _tem_documentos_mock, salvar_mensagem_mock
     ):
         pergunta = "A" * 60
 
-        resposta_stream = services.fazer_pergunta(
+        chat_id, resposta_stream = services.fazer_pergunta(
             pergunta_usuario=pergunta,
             usuario_id=str(self.user.id),
         )
         resposta = list(resposta_stream)
 
         chat = Chat.objects.get(usuario=self.user)
+        self.assertEqual(chat_id, chat.id)
         self.assertEqual(chat.titulo, ("A" * 50) + "...")
         self.assertEqual(resposta, [services.MENSAGEM_SEM_DOCS])
         self.assertEqual(salvar_mensagem_mock.call_count, 2)
@@ -46,10 +47,10 @@ class FazerPerguntaTests(TestCase):
 
     @patch("apps.rag.services.salvar_mensagem")
     @patch("apps.rag.services.RespostaResolver")
-    @patch("apps.rag.services.ChunkDocumento.objects.exists", return_value=True)
+    @patch("apps.rag.services.base_ativa_tem_documentos", return_value=True)
     def test_fazer_pergunta_uses_resposta_resolver_when_documents_exist(
         self,
-        _exists_mock,
+        _tem_documentos_mock,
         resposta_resolver_cls_mock,
         salvar_mensagem_mock,
     ):
@@ -61,17 +62,39 @@ class FazerPerguntaTests(TestCase):
         resolver_instance = resposta_resolver_cls_mock.return_value
         resolver_instance.criar_resposta.return_value = resposta_obj
 
-        resposta_stream = services.fazer_pergunta(
+        chat_id, resposta_stream = services.fazer_pergunta(
             pergunta_usuario="Pergunta com base indexada",
             chat_id=chat.id,
         )
 
+        self.assertEqual(chat_id, chat.id)
         self.assertEqual(list(resposta_stream), ["chunk-1", "chunk-2"])
         resolver_instance.criar_resposta.assert_called_once_with(
             pergunta_usuario="Pergunta com base indexada",
             chat_id=chat.id,
         )
         self.assertEqual(salvar_mensagem_mock.call_count, 1)
+
+    @patch("apps.rag.services.ChunkDocumento.objects.filter")
+    def test_base_ativa_tem_documentos_filters_chunks_by_active_base(
+        self, filter_mock
+    ):
+        base = MagicMock()
+        base.id = 42
+        filter_mock.return_value.exists.return_value = True
+
+        self.assertTrue(services.base_ativa_tem_documentos(base))
+        filter_mock.assert_called_once_with(metadata__base=42)
+        filter_mock.return_value.exists.assert_called_once_with()
+
+    @patch("apps.rag.services.ChunkDocumento.objects.filter")
+    def test_base_ativa_tem_documentos_returns_false_without_active_base(
+        self, filter_mock
+    ):
+        with patch("apps.rag.services.obter_base_ativa", return_value=None):
+            self.assertFalse(services.base_ativa_tem_documentos())
+
+        filter_mock.assert_not_called()
 
 
 class AimlServiceResponderTests(TestCase):
