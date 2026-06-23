@@ -48,14 +48,19 @@ class Rag():
     # Define o LLM globalmente no LlamaIndex
     Settings.llm = llm
   
-  def leitura_documento(self,caminho, tipo, data,baseid):
+  def leitura_documento(self,caminho, tipo, data,baseid, documento_id=None):
     def metadata_arquivo(file_path):        
-        return {
+        metadata = {
             "caminho": str(file_path),
             "tipo": tipo,
             "data": str(data),
             "base": int(baseid)
         }
+
+        if documento_id is not None:
+          metadata["documento_id"] = int(documento_id)
+
+        return metadata
     
     documents = SimpleDirectoryReader(
       input_files=[caminho],
@@ -107,9 +112,9 @@ class Rag():
       storage_context=storage_context
     )
 
-  def indexar_documento(self, caminho,tipo, data, baseid ):
+  def indexar_documento(self, caminho,tipo, data, baseid, documento_id=None ):
     #Lê um único arquivo, gera os chunks e insere no vector store.
-    self.leitura_documento(caminho,tipo, data, baseid)
+    self.leitura_documento(caminho,tipo, data, baseid, documento_id=documento_id)
 
     hybrid_vector_store = self._criar_vector_store()
     storage_context = StorageContext.from_defaults(vector_store=hybrid_vector_store)
