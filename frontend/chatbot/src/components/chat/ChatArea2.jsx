@@ -1,6 +1,6 @@
 import { memo, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { TbThumbDown, TbThumbUp } from "react-icons/tb";
+import { TbChevronDown, TbChevronUp, TbFileText, TbThumbDown, TbThumbUp } from "react-icons/tb";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { FeedbackModal } from "../FeedbackModal";
@@ -108,6 +108,70 @@ const MarkdownMessage = memo(function MarkdownMessage({ content }) {
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
         {content}
       </ReactMarkdown>
+    </div>
+  );
+});
+
+const MessageSources = memo(function MessageSources({ fontes = [] }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (!fontes.length) return null;
+
+  return (
+    <div
+      className="mt-2 w-full max-w-[92%] text-xs text-gray-700 sm:max-w-[85%]"
+      data-cy="message-sources"
+    >
+      <button
+        type="button"
+        onClick={() => setIsOpen((current) => !current)}
+        className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2.5 py-1.5 font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 hover:text-gray-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60"
+        aria-expanded={isOpen}
+        data-cy="message-sources-toggle"
+      >
+        <TbFileText size={16} aria-hidden="true" />
+        <span>Fontes</span>
+        <span className="text-gray-500">({fontes.length})</span>
+        {isOpen ? (
+          <TbChevronUp size={16} aria-hidden="true" />
+        ) : (
+          <TbChevronDown size={16} aria-hidden="true" />
+        )}
+      </button>
+
+      {isOpen && (
+        <ul
+          className="mt-2 space-y-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 shadow-sm"
+          data-cy="message-sources-list"
+        >
+          {fontes.map((fonte, index) => {
+            const metadata = [fonte.tipo, fonte.data].filter(Boolean).join(" - ");
+
+            return (
+              <li
+                key={`${fonte.chunk_id ?? fonte.node_id ?? index}`}
+                className="border-t border-gray-200 pt-2 first:border-t-0 first:pt-0"
+              >
+                <p className="break-words font-medium text-gray-900">
+                  {fonte.nome_arquivo || "Documento sem nome"}
+                </p>
+
+                {metadata && (
+                  <p className="mt-0.5 text-[11px] uppercase tracking-wide text-gray-500">
+                    {metadata}
+                  </p>
+                )}
+
+                {fonte.trecho && (
+                  <p className="mt-1 line-clamp-3 break-words text-gray-600">
+                    {fonte.trecho}
+                  </p>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 });
@@ -309,6 +373,8 @@ const MessageBubble = memo(function MessageBubble({
               <MarkdownMessage content={message.conteudo} />
             )}
           </article>
+
+          {!isUser && <MessageSources fontes={message.fontes} />}
 
           {!isUser && message.id !== undefined && message.id !== null && (
             <FeedbackActions

@@ -11,10 +11,11 @@ RUN npm run build
 FROM nginx:1.27-alpine
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build --chown=nginx:nginx /app/dist /usr/share/nginx/html
+COPY --from=build --chown=root:root /app/dist /usr/share/nginx/html
 
 RUN sed -i 's|^pid .*|pid /tmp/nginx.pid;|' /etc/nginx/nginx.conf \
     && sed -i '/^user /d' /etc/nginx/nginx.conf \
+    && chmod -R go-w /usr/share/nginx/html \
     && chown -R nginx:nginx /var/cache/nginx /var/log/nginx /etc/nginx/conf.d
 
 USER nginx
