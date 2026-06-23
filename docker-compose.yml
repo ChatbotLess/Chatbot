@@ -75,7 +75,7 @@ services:
     volumes:
       - backend_media:/app/media
       - backend_static:/app/staticfiles
-      - ./backend/chatbotless-firebase-adminsdk-fbsvc-c573eb97fa.json:/run/secrets/firebase-service-account.json:ro
+      - ./backend/chatbotless-firebase-adminsdk-fbsvc-743390d96f.json:/run/secrets/firebase-service-account.json:ro
     depends_on:
       db-postgres:
         condition: service_healthy
@@ -105,7 +105,7 @@ services:
       FIREBASE_CREDENTIALS_PATH: /run/secrets/firebase-service-account.json
     volumes:
       - backend_media:/app/media
-      - ./backend/chatbotless-firebase-adminsdk-fbsvc-c573eb97fa.json:/run/secrets/firebase-service-account.json:ro
+      - ./backend/chatbotless-firebase-adminsdk-fbsvc-743390d96f.json:/run/secrets/firebase-service-account.json:ro
     depends_on:
       db-postgres:
         condition: service_healthy

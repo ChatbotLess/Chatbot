@@ -160,7 +160,9 @@ FIREBASE_CREDENTIALS_PATH = os.getenv("FIREBASE_CREDENTIALS_PATH")
 if not FIREBASE_CREDENTIALS_PATH:
     default_firebase_credentials = BASE_DIR / "firebase-service-account.json"
     if not default_firebase_credentials.exists():
-        firebase_credentials_matches = sorted(BASE_DIR.glob("*firebase-adminsdk*.json"))
+        firebase_credentials_matches = sorted(
+            path for path in BASE_DIR.glob("*firebase-adminsdk*.json") if path.is_file()
+        )
         if firebase_credentials_matches:
             default_firebase_credentials = firebase_credentials_matches[0]
     FIREBASE_CREDENTIALS_PATH = str(default_firebase_credentials)
