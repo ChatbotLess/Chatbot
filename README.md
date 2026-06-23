@@ -137,7 +137,7 @@ O JSON da service account do Firebase nao e copiado para a imagem Docker.
 No Compose atual, ele e montado como arquivo somente leitura a partir de:
 
 ```text
-backend/chatbotless-firebase-adminsdk-fbsvc-c573eb97fa.json
+backend/chatbotless-firebase-adminsdk-fbsvc-743390d96f.json
 ```
 
 Dentro dos containers `backend` e `celery`, o arquivo fica disponivel em:

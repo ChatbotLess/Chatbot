@@ -1,4 +1,6 @@
 import secrets
+import tempfile
+from pathlib import Path
 from types import SimpleNamespace
 
 from django.contrib.auth import get_user_model
@@ -79,27 +81,29 @@ class FeedbackApiTests(TestCase):
 
 class MensagemSchemaOutTests(TestCase):
     def test_resolve_fontes_uses_chunk_relation_metadata(self):
-        mensagem = SimpleNamespace(
-            mensagem_chunks=_RelatedList(
-                [
-                    SimpleNamespace(
-                        nome_arquivo="",
-                        chunk=SimpleNamespace(
-                            id=10,
-                            node_id="node-10",
-                            text=" ".join(["texto"] * 90),
-                            metadata={
-                                "caminho": "/tmp/documentos/resolucao.pdf",
-                                "tipo": "RESOLUCAO",
-                                "data": "2026-06-01",
-                            },
-                        ),
-                    )
-                ]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            caminho = Path(temp_dir) / "documentos" / "resolucao.pdf"
+            mensagem = SimpleNamespace(
+                mensagem_chunks=_RelatedList(
+                    [
+                        SimpleNamespace(
+                            nome_arquivo="",
+                            chunk=SimpleNamespace(
+                                id=10,
+                                node_id="node-10",
+                                text=" ".join(["texto"] * 90),
+                                metadata={
+                                    "caminho": str(caminho),
+                                    "tipo": "RESOLUCAO",
+                                    "data": "2026-06-01",
+                                },
+                            ),
+                        )
+                    ]
+                )
             )
-        )
 
-        fontes = MensagemSchemaOut.resolve_fontes(mensagem)
+            fontes = MensagemSchemaOut.resolve_fontes(mensagem)
 
         self.assertEqual(len(fontes), 1)
         self.assertEqual(fontes[0].chunk_id, 10)
