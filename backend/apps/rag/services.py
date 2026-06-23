@@ -53,6 +53,24 @@ def _rag_output(_rag_instance):
     return {"status": "rag_inicializado"}
 
 
+def obter_base_ativa():
+    try:
+        return Base_Conhecimento.objects.filter(
+            status=Base_Conhecimento.StatusBaseDocumento.Ativo
+        ).first()
+    except DatabaseError:
+        return None
+
+
+def base_ativa_tem_documentos(base=None):
+    base = base or obter_base_ativa()
+
+    if base is None:
+        return False
+
+    return ChunkDocumento.objects.filter(metadata__base=base.id).exists()
+
+
 @traceable(name="Classificar intenção", run_type="tool")
 def classificar_intencao(pergunta_usuario):
     try:
@@ -220,10 +238,7 @@ def stream_resposta_rag(pergunta_usuario, chat_id):
 
     if intencao and float(intencao.get("confianca") or 0) > CLASSIFICADOR_CONFIANCA_MINIMA:
         tipo_documento = intencao["classificacao"]
-    try:
-        base = Base_Conhecimento.objects.filter(status='ATIVO').first()
-    except DatabaseError:
-        base = None
+    base = obter_base_ativa()
 
     base_id = base.id if base else None
     chat_engine = rag_instance.criar_chat_engine(chat_id, base_id, tipo_documento)
@@ -318,7 +333,7 @@ def fazer_pergunta(pergunta_usuario, chat_id=None, usuario_id=None):
         pergunta_original=pergunta_usuario
     )
 
-    sem_documentos = not ChunkDocumento.objects.exists()
+    sem_documentos = not base_ativa_tem_documentos()
 
     if sem_documentos:
         return chat_id, stream_sem_documentos(pergunta_usuario, chat_id)
