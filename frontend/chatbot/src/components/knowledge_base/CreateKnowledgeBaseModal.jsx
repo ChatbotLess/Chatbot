@@ -27,6 +27,11 @@ export function CreateKnowledgeBaseModal({
   isOpen,
   isPending,
   error,
+  initialValues,
+  title = "Nova base de conhecimento",
+  description = "A nova base sera definida como ativa.",
+  submitLabel = "Criar base",
+  pendingLabel = "Criando...",
   onClose,
   onSubmit,
 }) {
@@ -37,17 +42,21 @@ export function CreateKnowledgeBaseModal({
     formState: { errors },
   } = useForm({
     defaultValues: {
-      titulo: "",
-      versao: "",
-      descricao: "",
+      titulo: initialValues?.titulo ?? "",
+      versao: initialValues?.versao ?? "",
+      descricao: initialValues?.descricao ?? "",
     },
   });
 
   useEffect(() => {
     if (isOpen) {
-      reset();
+      reset({
+        titulo: initialValues?.titulo ?? "",
+        versao: initialValues?.versao ?? "",
+        descricao: initialValues?.descricao ?? "",
+      });
     }
-  }, [isOpen, reset]);
+  }, [initialValues, isOpen, reset]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -85,16 +94,14 @@ export function CreateKnowledgeBaseModal({
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-ifes-green-500/15 text-ifes-green-700">
               <FaDatabase />
             </div>
-            <div>
+            <div title={description}>
               <h2
                 id="create-knowledge-base-title"
                 className="text-lg font-semibold text-gray-950"
               >
-                Nova base de conhecimento
+                {title}
               </h2>
-              <p className="mt-0.5 text-xs text-gray-500">
-                A nova base será definida como ativa.
-              </p>
+              <p className="mt-0.5 text-xs text-gray-500">{description}</p>
             </div>
           </div>
 
@@ -212,7 +219,7 @@ export function CreateKnowledgeBaseModal({
               disabled={isPending}
               className="rounded-lg bg-ifes-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-ifes-green-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ifes-green-500/60 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isPending ? "Criando..." : "Criar base"}
+              {isPending ? pendingLabel : submitLabel}
             </button>
           </div>
         </form>

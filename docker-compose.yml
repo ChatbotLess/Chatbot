@@ -90,7 +90,7 @@ services:
     build:
       context: ./backend
     container_name: chatbot_celery
-    command: celery -A core worker -l info
+    command: celery -A core worker -l info --concurrency=1 --prefetch-multiplier=1 --max-tasks-per-child=1
     env_file:
       - ./backend/.env
     environment:

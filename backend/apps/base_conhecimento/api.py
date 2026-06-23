@@ -2,12 +2,46 @@ from ninja import Router, UploadedFile, File
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
-from .schemas import DocumentoSchemaOut, BaseConhecimentoIn, BaseConhecimentoOut, ErroSchema
+from django.utils import timezone
+from .schemas import (
+  DocumentoSchemaOut,
+  BaseConhecimentoIn,
+  BaseConhecimentoOut,
+  BaseConhecimentoUpdateIn,
+  DocumentoUpdateIn,
+  OperacaoSchema,
+  ErroSchema,
+)
 from .models import Documento, Base_Conhecimento
-from apps.base_conhecimento.tasks import processar_documento_rag
+from apps.base_conhecimento.tasks import processar_base_rag, processar_documento_rag
+from apps.rag.services import remover_chunks_base, remover_chunks_documento
 from core.permissions import require_staff
 
 router = Router()
+
+
+def _erro_validacao(error):
+  return {"erro": getattr(error, "messages", [str(error)])}
+
+
+def _caminho_documento(documento):
+  try:
+    return documento.caminho.path if documento.caminho else None
+  except ValueError:
+    return None
+
+
+def _remover_arquivo_documento(documento):
+  if documento.caminho:
+    documento.caminho.delete(save=False)
+
+
+def _enfileirar_reindexacao_documento(documento):
+  transaction.on_commit(lambda: processar_documento_rag.delay(documento.id))
+
+
+def _enfileirar_reindexacao_base(base):
+  transaction.on_commit(lambda: processar_base_rag.delay(base.id))
 
 @router.get("/listarbase",response=list[BaseConhecimentoOut], tags=["Base Conhecimento"])
 def listar_base_conhecimento(request):
@@ -73,6 +107,55 @@ def criar_base_conhecimento(request,titulo : str, versao : str, descricao : str)
 
   return base
 
+
+@router.put("/atualizarbase",response={200: BaseConhecimentoOut, 400: ErroSchema}, tags=["Base Conhecimento"])
+def atualizar_base(request, baseID: int, payload: BaseConhecimentoUpdateIn):
+  require_staff(request)
+  base = get_object_or_404(Base_Conhecimento, id=baseID)
+
+  base.titulo = payload.titulo.strip()
+  base.versao = payload.versao.strip()
+  base.descricao = payload.descricao.strip()
+
+  try:
+    base.full_clean()
+    base.save()
+  except ValidationError as e:
+    return 400, _erro_validacao(e)
+
+  return base
+
+
+@router.delete("/excluirbase",response={200: OperacaoSchema}, tags=["Base Conhecimento"])
+def excluir_base(request, baseID: int):
+  require_staff(request)
+  base = get_object_or_404(Base_Conhecimento, id=baseID)
+  documentos = list(base.base_pai.all())
+
+  with transaction.atomic():
+    remover_chunks_base(base.id)
+    for documento in documentos:
+      _remover_arquivo_documento(documento)
+    base.delete()
+
+  return {"mensagem": "Base de conhecimento excluida.", "total": len(documentos)}
+
+
+@router.post("/reindexarbase",response={200: OperacaoSchema}, tags=["Base Conhecimento"])
+def reindexar_base(request, baseID: int):
+  require_staff(request)
+  base = get_object_or_404(Base_Conhecimento, id=baseID)
+  documentos = list(base.base_pai.all())
+
+  with transaction.atomic():
+    for documento in documentos:
+      documento.status = Documento.StatusDocumento.PROCESSANDO
+      documento.data_atualizacao = timezone.now()
+      documento.save(update_fields=["status", "data_atualizacao"])
+    _enfileirar_reindexacao_base(base)
+
+  return {"mensagem": "Reindexacao da base enfileirada.", "total": len(documentos)}
+
 @router.post("/upload", tags=["Documento"])
 def upload(request, base_id: int, file: File[UploadedFile], tipo: str):
   user = require_staff(request)
@@ -117,3 +200,68 @@ def listar_documentos(request):
 def listar_documentos_base(request, baseID):
   require_staff(request)
   return Documento.objects.filter(base_id=baseID)
+
+
+@router.put("/atualizardocumento",response={200: DocumentoSchemaOut, 400: ErroSchema}, tags=["Documento"])
+def atualizar_documento(request, documentoID: int, payload: DocumentoUpdateIn):
+  require_staff(request)
+  documento = get_object_or_404(Documento, id=documentoID)
+
+  documento.nome_documento = payload.nome_documento.strip()
+  documento.tipo = payload.tipo.strip().upper()
+  documento.status = Documento.StatusDocumento.PROCESSANDO
+  documento.data_atualizacao = timezone.now()
+
+  try:
+    documento.full_clean()
+    with transaction.atomic():
+      caminho = _caminho_documento(documento)
+      remover_chunks_documento(
+        documento_id=documento.id,
+        caminho=caminho,
+        base_id=documento.base.id,
+      )
+      documento.save()
+      _enfileirar_reindexacao_documento(documento)
+  except ValidationError as e:
+    return 400, _erro_validacao(e)
+
+  return documento
+
+
+@router.delete("/excluirdocumento",response={200: OperacaoSchema}, tags=["Documento"])
+def excluir_documento(request, documentoID: int):
+  require_staff(request)
+  documento = get_object_or_404(Documento, id=documentoID)
+  caminho = _caminho_documento(documento)
+
+  with transaction.atomic():
+    remover_chunks_documento(
+      documento_id=documento.id,
+      caminho=caminho,
+      base_id=documento.base.id,
+    )
+    _remover_arquivo_documento(documento)
+    documento.delete()
+
+  return {"mensagem": "Documento excluido.", "total": 1}
+
+
+@router.post("/reindexardocumento",response={200: DocumentoSchemaOut}, tags=["Documento"])
+def reindexar_documento(request, documentoID: int):
+  require_staff(request)
+  documento = get_object_or_404(Documento, id=documentoID)
+  caminho = _caminho_documento(documento)
+
+  with transaction.atomic():
+    remover_chunks_documento(
+      documento_id=documento.id,
+      caminho=caminho,
+      base_id=documento.base.id,
+    )
+    documento.status = Documento.StatusDocumento.PROCESSANDO
+    documento.data_atualizacao = timezone.now()
+    documento.save(update_fields=["status", "data_atualizacao"])
+    _enfileirar_reindexacao_documento(documento)
+
+  return documento

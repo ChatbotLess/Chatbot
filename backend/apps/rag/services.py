@@ -9,6 +9,7 @@ import os
 import requests
 import time
 from django.db import DatabaseError
+from django.db.models import Q
 
 if not hasattr(time, "clock"):
     time.clock = time.perf_counter
@@ -69,6 +70,30 @@ def base_ativa_tem_documentos(base=None):
         return False
 
     return ChunkDocumento.objects.filter(metadata__base=base.id).exists()
+
+
+def remover_chunks_base(base_id):
+    deleted, _ = ChunkDocumento.objects.filter(metadata__base=int(base_id)).delete()
+    return deleted
+
+
+def remover_chunks_documento(documento_id=None, caminho=None, base_id=None):
+    filtros = Q()
+
+    if documento_id is not None:
+        filtros |= Q(metadata__documento_id=int(documento_id))
+
+    if caminho is not None and base_id is not None:
+        filtros |= Q(
+            metadata__caminho=str(caminho),
+            metadata__base=int(base_id),
+        )
+
+    if not filtros.children:
+        return 0
+
+    deleted, _ = ChunkDocumento.objects.filter(filtros).delete()
+    return deleted
 
 
 @traceable(name="Classificar intenção", run_type="tool")
@@ -361,7 +386,7 @@ def responder_mensagem(userid, chat_id=None, pergunta=""):
 
 
 @traceable(name="Indexar documento no RAG", run_type="chain")
-def indexar_documento_no_rag(caminho: str, tipo: str, data, baseid):
+def indexar_documento_no_rag(caminho: str, tipo: str, data, baseid, documento_id=None):
     rag_instance = Rag()
     rag_instance.carregar_llm()
-    rag_instance.indexar_documento(caminho, tipo, data, baseid)
+    rag_instance.indexar_documento(caminho, tipo, data, baseid, documento_id=documento_id)

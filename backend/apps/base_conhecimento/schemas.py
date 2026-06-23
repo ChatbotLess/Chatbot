@@ -19,5 +19,18 @@ class BaseConhecimentoOut(ModelSchema):
         model = Base_Conhecimento
         fields = "__all__"
 
+class BaseConhecimentoUpdateIn(Schema):
+    titulo: str
+    versao: str
+    descricao: str
+
+class DocumentoUpdateIn(Schema):
+    nome_documento: str
+    tipo: str
+
+class OperacaoSchema(Schema):
+    mensagem: str
+    total: int = 0
+
 class ErroSchema(Schema):
     erro: list[str]
